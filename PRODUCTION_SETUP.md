@@ -22,6 +22,7 @@ Order mein follow karein.
 | **Stale bookings** | — | 30 min mein mechanic na mile to auto-cancel + credit refund (pg_cron) |
 | **Android** | Package `com.speedyservice.eight_speedy_service`, debug signing | `com.speedyservice.customer`, release signing, R8 + Razorpay ProGuard rules, UPI apps query |
 | **Mechanic app backend** | — | `mechanic_*` RPCs ready (accept, arrived, OTP se start, complete, location) |
+| **Mechanic Partner app** | — | `mechanic_app/` — login, self-registration + admin verify, Online/Offline, nearby requests, job flow (navigate → arrived → OTP → complete), job release, history & rating |
 
 ---
 
@@ -61,17 +62,17 @@ supabase functions deploy razorpay-webhook --no-verify-jwt
 
 > ⚠️ `RAZORPAY_KEY_SECRET` kabhi app ya git mein mat daalein. App mein sirf Key ID jaati hai.
 
-## Step 3 — Mechanics add karna (abhi Dashboard se)
+## Step 3 — Mechanic Partner app (`mechanic_app/`)
 
-**Table Editor → mechanics → Insert row**: `full_name`, `phone` (`+91…`), `shop_name`,
-`vehicle_specialties`, `is_verified = true`. Mechanic Partner app banne tak location
-manually `current_lat/current_lng` + `is_online = true` set karke test karein
-(`updated_at` 20 min se purana nahi hona chahiye radar par dikhne ke liye).
-
-Mechanic app ke liye backend ready hai: mechanic jab phone OTP se login kare, uska
-`auth.users.id` mechanics row ke `user_id` mein daal dein. Phir woh app yeh RPCs call kare:
-`mechanic_set_status`, `mechanic_get_open_requests`, `mechanic_accept_booking`,
-`mechanic_mark_arrived`, `mechanic_start_job(booking_id, otp)`, `mechanic_complete_job`.
+1. **SQL Editor** → `supabase/migrations/20261117000002_mechanic_partner_app.sql` ka poora content paste → **Run**
+   (pehli migration ke baad; dobara chalana safe hai).
+2. Mechanics do tarike se judte hain:
+   - **Khud register**: mechanic Partner app mein phone OTP se login → form bhare → row `is_verified = false` banti hai.
+   - **Aap pehle se add karein**: Table Editor → mechanics → `full_name`, `phone` (`+91…`), `vehicle_specialties`.
+     Mechanic jab us number se login karega, account apne aap link ho jaayega.
+3. Verify karna: Table Editor → mechanics → `is_verified = true`. Tabhi mechanic Online jaa sakta hai.
+4. App ka code alag repo mein hai: `github.com/durgadas-karmakar07/8SpeedyService.Partner` (PC par `D:\8SpeedyService.Partner`). Chalana / build: wahan ka `README.md`.
+5. Partner app force-update: `app_config.min_partner_version`.
 
 ## Step 4 — App keys & placeholders
 
@@ -116,7 +117,11 @@ Output: `build/app/outputs/bundle/release/app-release.aab`
 ## Step 6 — Launch se pehle test checklist
 
 - [ ] Naya number se login → `customers` table mein row + 5 credits
-- [ ] Free booking → radar → Dashboard se booking `ACCEPTED` + `mechanic_id` set → live tracking khulta hai
+- [ ] Partner app: naye number se register → Dashboard se `is_verified = true` → Online
+- [ ] Free booking → Partner app mein request dikhe → Accept → customer app mein live tracking khule
+- [ ] Partner: Arrived → customer ka OTP → Complete → customer app mein rating screen
+- [ ] Partner: Accept ke baad "job chhodein" → customer app wapas radar par
+- [ ] Customer accepted booking cancel kare → Partner app mein "Job closed" popup
 - [ ] Credits 0 karke paid booking → Razorpay test mode (`rzp_test_…`) se UPI pay → `payment_status = PAID`
 - [ ] Payment beech mein cancel → booking active nahi dikhti
 - [ ] Searching mein cancel → credit wapas

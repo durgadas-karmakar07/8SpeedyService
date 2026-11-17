@@ -12,6 +12,7 @@ import '../models/booking_model.dart';
 import '../models/mechanic_model.dart';
 import '../services/booking_service.dart';
 import '4_home_map_screen.dart';
+import '6_searching_radar_screen.dart';
 import '8_job_completed_screen.dart';
 
 /// Displays live mechanic location tracking over OpenStreetMap (top 60%)
@@ -95,6 +96,25 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
         MaterialPageRoute<void>(
           builder: (_) =>
               JobCompletedScreen(booking: updated, mechanic: _mechanic),
+        ),
+      );
+      return;
+    }
+
+    // Mechanic dropped the job before starting -> booking is back in search.
+    if (updated.isSearching) {
+      _hasCompletedNavigation = true;
+      _disposeStreams();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Mechanic nahi aa paaye. Aapke liye dusra mechanic dhoondh rahe hain...',
+          ),
+        ),
+      );
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (_) => SearchingRadarScreen(initialBooking: updated),
         ),
       );
       return;

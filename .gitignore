@@ -55,3 +55,7 @@ app.*.map.json
 !/env/example.json
 /supabase/.env
 /supabase/.temp/
+
+# Mechanic Partner app lives in its own repo: 8SpeedyService.Partner
+/mechanic_app/
+/_to_delete/
