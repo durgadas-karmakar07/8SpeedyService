@@ -124,10 +124,10 @@ class AppConstants {
   static const String supportPhoneDisplay = '+91 96352 97320';
   static const String whatsappSupportUrl =
       'https://wa.me/919635297320?text=Hi%208SpeedyService%20Support%2C%20I%20need%20help%20with%20my%20booking.';
-  // Legal pages (GitHub Pages site from the `8speedyService-legal` repo — see
+  // Legal pages (GitHub Pages site from the `8SpeedyService` (gh-pages branch) repo — see
   // PRODUCTION_SETUP.md). Required by Google Play.
   static const String legalBaseUrl =
-      'https://durgadas-karmakar07.github.io/8speedyService-legal';
+      'https://durgadas-karmakar07.github.io/8SpeedyService';
   static const String privacyPolicyUrl = '$legalBaseUrl/privacy.html';
   static const String termsUrl = '$legalBaseUrl/terms.html';
   static const String deleteAccountUrl = '$legalBaseUrl/delete-account.html';

@@ -87,27 +87,28 @@ us `razorpay_payment_id` ka refund karein → row mein `refund_status = 'REFUNDE
 - **Verify**: `is_verified = true` (documents check karne ke baad). Tabhi mechanic Online ja sakta hai.
 - Partner app force-update: `app_config.min_partner_version`. Customer app: `app_config.min_android_version`.
 
-## Step 4 — Legal website (Play Store ke liye zaroori)
+## Step 4 — Legal website ✅ LIVE
 
-Google Play ko Privacy Policy aur Account-deletion ka **public link** chahiye. Free mein GitHub Pages:
+GitHub Pages par live hai (is repo ki `gh-pages` branch se):
 
-1. `legal-site/` ki files taiyaar hain (support number +91 96352 97320, address Durgapur). Apna naam
-   "Grievance Officer" ki jagah likhna ho to `privacy.html` mein badal dein.
-   Apps ke andar Privacy Policy / Terms ab **app mein hi** khulte hain, isliye yeh website sirf Play Console ke link ke liye chahiye.
-2. GitHub par naya **Public** repo banayein: naam **`8speedyService-legal`**
-3. `legal-site/` ki saari files us repo mein upload karein (Add file → Upload files)
-4. Repo → **Settings → Pages** → Source: *Deploy from a branch* → `main` / `(root)` → Save
-5. 1–2 minute baad yeh link khulna chahiye:
-   `https://durgadas-karmakar07.github.io/8speedyService-legal/privacy.html`
+| Page | Link (Play Console mein yahi daalein) |
+|---|---|
+| Home | https://durgadas-karmakar07.github.io/8SpeedyService/ |
+| Privacy Policy | https://durgadas-karmakar07.github.io/8SpeedyService/privacy.html |
+| Terms (customer) | https://durgadas-karmakar07.github.io/8SpeedyService/terms.html |
+| Partner Terms | https://durgadas-karmakar07.github.io/8SpeedyService/partner-terms.html |
+| Delete account | https://durgadas-karmakar07.github.io/8SpeedyService/delete-account.html |
 
-Repo ka naam alag rakha to dono apps ke constants mein `legalBaseUrl` badlein.
+- Pages badalne ho to `legal-site/` (main branch) aur `gh-pages` branch dono mein file update karein.
+- Apps ke andar Privacy Policy / Terms **app mein hi** khulte hain (internet hosting par depend nahi).
+- "Grievance Officer" mein apna asli naam aur pata likhna behtar hai (IT Rules, India).
 > Yeh pages ek template hain — launch se pehle kisi CA / lawyer se ek baar padhwa lena achha hai.
 
 ## Step 5 — App details & placeholders (dono apps)
 
 Customer: `lib/core/constants/app_constants.dart` · Partner: `lib/core/constants.dart`
 - `supportPhoneNumber`, `whatsappSupportUrl` → ✅ +91 96352 97320 set hai
-- `legalBaseUrl` → Step 4 wala link
+- `legalBaseUrl` → ✅ `https://durgadas-karmakar07.github.io/8SpeedyService`
 - Har release par `pubspec.yaml` ka `version:` aur `appVersion` saath badlein (`1.0.1+2` …).
 
 ## Step 6 — Build (aapke PC par)

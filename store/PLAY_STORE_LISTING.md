@@ -35,7 +35,7 @@ WHY 8SPEEDYSERVICE
 Service area: Durgapur, West Bengal (City Centre, Benachity, Bidhannagar, A-Zone, B-Zone and nearby).
 
 Support: WhatsApp +91 96352 97320 (also in the app: Menu → WhatsApp Support).
-Privacy Policy: https://durgadas-karmakar07.github.io/8speedyService-legal/privacy.html
+Privacy Policy: https://durgadas-karmakar07.github.io/8SpeedyService/privacy.html
 
 ---
 
@@ -43,7 +43,7 @@ Privacy Policy: https://durgadas-karmakar07.github.io/8speedyService-legal/priva
 
 | Section | Answer |
 |---|---|
-| Privacy policy | `https://durgadas-karmakar07.github.io/8speedyService-legal/privacy.html` |
+| Privacy policy | `https://durgadas-karmakar07.github.io/8SpeedyService/privacy.html` |
 | App access | Login required (phone OTP). Reviewer ke liye: Supabase → Auth → Phone → **Test OTP** add karein (jaise `919999999999=123456`) aur yahan number + OTP likhein |
 | Ads | No ads |
 | Content rating | Questionnaire → "Utility / Productivity / Other", koi violence/sexual content nahi → **Everyone / 3+** |
@@ -52,7 +52,7 @@ Privacy Policy: https://durgadas-karmakar07.github.io/8speedyService-legal/priva
 | Government app | No |
 | Financial features | None (payments via Razorpay only for platform fee) |
 | Health | No |
-| Account deletion | Yes, in-app (Menu → Account & Privacy → Delete my account). Web link: `https://durgadas-karmakar07.github.io/8speedyService-legal/delete-account.html` |
+| Account deletion | Yes, in-app (Menu → Account & Privacy → Delete my account). Web link: `https://durgadas-karmakar07.github.io/8SpeedyService/delete-account.html` |
 
 ## Data safety form
 
