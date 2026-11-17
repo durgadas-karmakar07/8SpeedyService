@@ -108,7 +108,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Mechanic nahi aa paaye. Aapke liye dusra mechanic dhoondh rahe hain...',
+            'The mechanic could not come. Finding another mechanic for you...',
           ),
         ),
       );

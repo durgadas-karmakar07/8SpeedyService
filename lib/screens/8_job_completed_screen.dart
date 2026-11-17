@@ -90,9 +90,6 @@ class _JobCompletedScreenState extends State<JobCompletedScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final vehicleOption = AppConstants.vehicleOptionForKey(
-      widget.booking.vehicleType,
-    );
 
     return Scaffold(
       backgroundColor: AppConstants.backgroundColor,
@@ -153,7 +150,7 @@ class _JobCompletedScreenState extends State<JobCompletedScreen> {
                         Text(
                           widget.mechanic != null
                               ? 'Repaired by ${widget.mechanic!.fullName} (${widget.mechanic!.shopName})'
-                              : 'Your ${vehicleOption.title} service is complete.',
+                              : 'Your ${widget.booking.vehicleDisplayName} service is complete.',
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: Colors.blueGrey.shade700,
@@ -163,8 +160,8 @@ class _JobCompletedScreenState extends State<JobCompletedScreen> {
                         const Divider(height: 1),
                         const SizedBox(height: 14),
                         _SummaryRow(
-                          label: 'Vehicle Type',
-                          value: vehicleOption.title,
+                          label: 'Vehicle',
+                          value: widget.booking.vehicleDisplayName,
                         ),
                         const SizedBox(height: 8),
                         _SummaryRow(

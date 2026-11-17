@@ -204,16 +204,12 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: AppConstants.primaryColor.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: const Icon(
-                      Icons.phone_android_rounded,
-                      color: AppConstants.primaryColor,
-                      size: 32,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(18),
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      width: 64,
+                      height: 64,
                     ),
                   ),
                   const SizedBox(height: 20),

@@ -43,12 +43,35 @@ class SpeedyServiceApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
+        fontFamily: 'Poppins',
         colorScheme: colorScheme,
         scaffoldBackgroundColor: AppConstants.backgroundColor,
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,
           foregroundColor: AppConstants.secondaryDarkColor,
           elevation: 0,
+          scrolledUnderElevation: 0.5,
+          surfaceTintColor: Colors.transparent,
+          titleTextStyle: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: AppConstants.secondaryDarkColor,
+          ),
+        ),
+        snackBarTheme: SnackBarThemeData(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppConstants.secondaryDarkColor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        chipTheme: ChipThemeData(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        dialogTheme: DialogThemeData(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        ),
+        bottomSheetTheme: const BottomSheetThemeData(
+          backgroundColor: Colors.white,
           surfaceTintColor: Colors.transparent,
         ),
         filledButtonTheme: FilledButtonThemeData(

@@ -8,6 +8,8 @@ import '../core/utils/error_helper.dart';
 import '../models/app_config_model.dart';
 import '../models/booking_model.dart';
 import '../models/customer_model.dart';
+import '../models/customer_vehicle.dart';
+import '../widgets/vehicle_widgets.dart';
 import '../services/auth_service.dart';
 import '../services/booking_service.dart';
 import '../services/payment_service.dart';
@@ -18,14 +20,14 @@ import '6_searching_radar_screen.dart';
 class IssueSummaryScreen extends StatefulWidget {
   const IssueSummaryScreen({
     super.key,
-    required this.vehicleType,
+    required this.vehicle,
     required this.pickupLat,
     required this.pickupLng,
     required this.pickupAddress,
     this.initialFreeBookingsLeft = 0,
   });
 
-  final String vehicleType;
+  final CustomerVehicle vehicle;
   final double pickupLat;
   final double pickupLng;
   final String pickupAddress;
@@ -110,7 +112,7 @@ class _IssueSummaryScreenState extends State<IssueSummaryScreen> {
 
   int get _vehicleBaseFee {
     final config = _appConfig ?? AppConfigModel.defaults();
-    return config.feeForVehicle(widget.vehicleType);
+    return config.feeForVehicle(widget.vehicle.category);
   }
 
   Future<void> _confirmAndCreateBooking() async {
@@ -138,7 +140,8 @@ class _IssueSummaryScreenState extends State<IssueSummaryScreen> {
 
     try {
       final result = await _bookingService.createBookingSecure(
-        vehicleType: widget.vehicleType,
+        vehicleType: widget.vehicle.category,
+        vehicleId: widget.vehicle.id,
         issueTags: _selectedIssues.toList(),
         issueNote: _noteController.text,
         pickupAddress: widget.pickupAddress,
@@ -160,7 +163,7 @@ class _IssueSummaryScreenState extends State<IssueSummaryScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
-      _showError(error, 'Booking create nahi ho payi. Please retry.');
+      _showError(error, 'Could not create the booking. Please try again.');
     }
   }
 
@@ -168,8 +171,6 @@ class _IssueSummaryScreenState extends State<IssueSummaryScreen> {
     final phone =
         _customer?.phone ?? _authService.currentUser?.phone ?? '';
     final name = _customer?.fullName ?? '8SpeedyService Customer';
-    final vehicleOption = AppConstants.vehicleOptionForKey(widget.vehicleType);
-
     setState(() => _isSubmitting = true);
 
     late final RazorpayOrderInfo order;
@@ -184,7 +185,7 @@ class _IssueSummaryScreenState extends State<IssueSummaryScreen> {
         return;
       }
       setState(() => _isSubmitting = false);
-      _showError(error, 'Payment start nahi ho paya. Please retry.');
+      _showError(error, 'Could not start the payment. Please try again.');
       return;
     }
     if (!mounted) return;
@@ -196,7 +197,7 @@ class _IssueSummaryScreenState extends State<IssueSummaryScreen> {
       bookingId: result.bookingId,
       customerPhone: phone,
       customerName: name,
-      description: 'Platform Fee - ${vehicleOption.title}',
+      description: 'Platform Fee - ${widget.vehicle.name}',
       onSuccess: (response) {
         _verifyPayment(result, (
           orderId: response.orderId ?? order.orderId,
@@ -237,7 +238,7 @@ class _IssueSummaryScreenState extends State<IssueSummaryScreen> {
       setState(() => _isSubmitting = false);
       _showError(
         error,
-        'Payment ho gaya, par confirm nahi hua. Confirm dabakar retry karein — paisa dobara nahi katega.',
+        'Payment received but not confirmed yet. Tap the button again to retry — you will not be charged twice.',
       );
     }
   }
@@ -277,7 +278,9 @@ class _IssueSummaryScreenState extends State<IssueSummaryScreen> {
       id: result.bookingId,
       customerId: _authService.currentUser?.id ?? '',
       mechanicId: null,
-      vehicleType: widget.vehicleType,
+      vehicleType: widget.vehicle.category,
+      vehicleLabel: widget.vehicle.name,
+      vehicleBodyType: widget.vehicle.bodyType,
       issueTags: _selectedIssues.toList(),
       issueNote: _noteController.text.trim(),
       pickupAddress: widget.pickupAddress,
@@ -302,7 +305,6 @@ class _IssueSummaryScreenState extends State<IssueSummaryScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final vehicleOption = AppConstants.vehicleOptionForKey(widget.vehicleType);
     final minVisitCharge = _appConfig?.minVisitCharge ?? 49;
 
     return Scaffold(
@@ -353,18 +355,11 @@ class _IssueSummaryScreenState extends State<IssueSummaryScreen> {
                             ),
                             child: Row(
                               children: <Widget>[
-                                Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: AppConstants.primaryColor.withValues(
-                                      alpha: 0.12,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Icon(
-                                    vehicleOption.icon,
-                                    color: AppConstants.primaryColor,
-                                    size: 26,
+                                SizedBox(
+                                  width: 84,
+                                  child: VehicleImage(
+                                    asset: widget.vehicle.asset,
+                                    height: 52,
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -374,7 +369,7 @@ class _IssueSummaryScreenState extends State<IssueSummaryScreen> {
                                         CrossAxisAlignment.start,
                                     children: <Widget>[
                                       Text(
-                                        vehicleOption.title,
+                                        widget.vehicle.name,
                                         style: theme.textTheme.titleSmall
                                             ?.copyWith(
                                               fontWeight: FontWeight.w800,
@@ -457,7 +452,7 @@ class _IssueSummaryScreenState extends State<IssueSummaryScreen> {
                             decoration: InputDecoration(
                               labelText: 'Additional Note (Optional)',
                               hintText:
-                                  'E.g., Near Junction Mall gate, Honda Activa 6G...',
+                                  'E.g. Near Junction Mall gate, engine stops right after starting...',
                               filled: true,
                               fillColor: Colors.white,
                               border: OutlineInputBorder(

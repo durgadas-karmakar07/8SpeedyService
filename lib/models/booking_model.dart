@@ -1,4 +1,5 @@
 import '../core/constants/app_constants.dart';
+import '../core/constants/vehicle_catalog.dart';
 
 /// Vehicle repair booking stored in the Supabase `bookings` table.
 class BookingModel {
@@ -20,6 +21,8 @@ class BookingModel {
     this.rating,
     this.reviewText,
     this.createdAt,
+    this.vehicleLabel,
+    this.vehicleBodyType,
   });
 
   /// Parses a `bookings` JSON row from Supabase.
@@ -59,6 +62,8 @@ class BookingModel {
       rating: (json['rating'] as num?)?.toInt(),
       reviewText: json['review_text'] as String?,
       createdAt: parsedCreatedAt,
+      vehicleLabel: json['vehicle_label'] as String?,
+      vehicleBodyType: json['vehicle_body_type'] as String?,
     );
   }
 
@@ -79,6 +84,20 @@ class BookingModel {
   final int? rating;
   final String? reviewText;
   final DateTime? createdAt;
+
+  /// "Honda Activa 6G • WB38AB1234" (null for bookings made before vehicles).
+  final String? vehicleLabel;
+  final String? vehicleBodyType;
+
+  /// Name to show: saved vehicle name, else the old category title.
+  String get vehicleDisplayName {
+    final label = vehicleLabel?.split(' • ').first.trim() ?? '';
+    if (label.isNotEmpty) return label;
+    return AppConstants.vehicleOptionForKey(vehicleType).title;
+  }
+
+  String get vehicleAsset =>
+      VehicleCatalog.assetFor(bodyType: vehicleBodyType, category: vehicleType);
 
   bool get isSearching => status == AppConstants.statusSearching;
   bool get isAccepted => status == AppConstants.statusAccepted;
@@ -106,6 +125,8 @@ class BookingModel {
     int? rating,
     String? reviewText,
     DateTime? createdAt,
+    String? vehicleLabel,
+    String? vehicleBodyType,
   }) {
     return BookingModel(
       id: id ?? this.id,
@@ -125,6 +146,8 @@ class BookingModel {
       rating: rating ?? this.rating,
       reviewText: reviewText ?? this.reviewText,
       createdAt: createdAt ?? this.createdAt,
+      vehicleLabel: vehicleLabel ?? this.vehicleLabel,
+      vehicleBodyType: vehicleBodyType ?? this.vehicleBodyType,
     );
   }
 

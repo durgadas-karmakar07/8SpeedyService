@@ -33,7 +33,7 @@ class _ReferEarnScreenState extends State<ReferEarnScreen> {
     final code = _friendCodeController.text.trim();
     if (code.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Friend ka referral code daalein.')),
+        const SnackBar(content: Text('Enter your friend\'s referral code.')),
       );
       return;
     }
@@ -46,7 +46,7 @@ class _ReferEarnScreenState extends State<ReferEarnScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Referral code apply ho gaya! Aapke friend ko aapki pehli booking complete hone par 1 free booking milegi.',
+            'Referral code applied! Your friend gets 1 free booking when your first booking is completed.',
           ),
         ),
       );
@@ -58,7 +58,7 @@ class _ReferEarnScreenState extends State<ReferEarnScreen> {
           content: Text(
             ErrorHelper.friendly(
               error,
-              fallback: 'Code apply nahi ho paya. Please retry.',
+              fallback: 'Could not apply the code. Please try again.',
             ),
           ),
         ),
@@ -106,7 +106,7 @@ class _ReferEarnScreenState extends State<ReferEarnScreen> {
   Future<void> _shareViaWhatsApp() async {
     if (_referralCode.isEmpty) return;
     final message =
-        'Durgapur mein gaadi beech raste ruk gayi? 8SpeedyService app se 15 min mein verified mechanic bulao! Pehli 5 bookings par platform fee ₹0. Signup ke baad Refer & Earn mein mera code daalo: $_referralCode';
+        'Vehicle broke down in Durgapur? Book a nearby verified mechanic with the 8SpeedyService app and track them live! ₹0 platform fee on your first 5 bookings. After signing up, enter my code in Refer & Earn: $_referralCode';
     final uri = Uri.parse(
       'https://wa.me/?text=${Uri.encodeComponent(message)}',
     );
@@ -301,7 +301,7 @@ class _ReferEarnScreenState extends State<ReferEarnScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(
-                                'Friend ne invite kiya? Unka code daalein',
+                                'Invited by a friend? Enter their code',
                                 style: TextStyle(
                                   color: Colors.blueGrey.shade600,
                                   fontWeight: FontWeight.w600,
@@ -345,7 +345,7 @@ class _ReferEarnScreenState extends State<ReferEarnScreen> {
                               ),
                               const SizedBox(height: 6),
                               const Text(
-                                'Sirf pehli booking se pehle apply ho sakta hai.',
+                                'Can be applied only before your first booking.',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.black54,

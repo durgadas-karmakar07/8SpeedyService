@@ -8,15 +8,23 @@ import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../core/constants/app_constants.dart';
+import '../core/constants/legal_content.dart';
 import '../core/utils/location_helper.dart';
 import '../models/app_config_model.dart';
 import '../models/customer_model.dart';
+import '../models/customer_vehicle.dart';
 import '../services/auth_service.dart';
 import '../services/booking_service.dart';
+import '../services/vehicle_service.dart';
+import '../widgets/vehicle_widgets.dart';
 import '3_phone_login_screen.dart';
 import '5_issue_summary_screen.dart';
+import 'drawer/account_screen.dart';
+import 'drawer/legal_screen.dart';
 import 'drawer/my_bookings_screen.dart';
 import 'drawer/refer_earn_screen.dart';
+import 'vehicles/add_vehicle_screen.dart';
+import 'vehicles/my_vehicles_screen.dart';
 
 /// Main booking entry screen featuring an interactive OpenStreetMap pickup pin,
 /// live free-credits badge, navigation drawer, and vehicle type selector.
@@ -31,6 +39,7 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
   final MapController _mapController = MapController();
   final AuthService _authService = AuthService();
   final BookingService _bookingService = BookingService();
+  final VehicleService _vehicleService = VehicleService();
 
   StreamSubscription<MapEvent>? _mapEventSub;
   Timer? _geocodeDebounce;
@@ -40,7 +49,9 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
     AppConstants.defaultLng,
   );
   String _pickupAddress = AppConstants.defaultPickupAddress;
-  String _selectedVehicleType = 'two_wheeler';
+  List<CustomerVehicle> _vehicles = const <CustomerVehicle>[];
+  CustomerVehicle? _selectedVehicle;
+  bool _isLoadingVehicles = true;
 
   CustomerModel? _customer;
   AppConfigModel _appConfig = AppConfigModel.defaults();
@@ -55,7 +66,35 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
   void initState() {
     super.initState();
     _loadCustomerAndConfig();
+    _loadVehicles();
     _locateUser(showMessages: false);
+  }
+
+  Future<void> _loadVehicles({String? selectId}) async {
+    try {
+      final list = await _vehicleService.fetchMyVehicles();
+      if (!mounted) return;
+      setState(() {
+        _vehicles = list;
+        _isLoadingVehicles = false;
+        final keepId = selectId ?? _selectedVehicle?.id;
+        _selectedVehicle = list.isEmpty
+            ? null
+            : list.firstWhere((v) => v.id == keepId, orElse: () => list.first);
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isLoadingVehicles = false);
+    }
+  }
+
+  Future<void> _addVehicle() async {
+    final added = await Navigator.of(context).push<CustomerVehicle>(
+      MaterialPageRoute<CustomerVehicle>(builder: (_) => const AddVehicleScreen()),
+    );
+    if (added != null && mounted) {
+      await _loadVehicles(selectId: added.id);
+    }
   }
 
   @override
@@ -192,6 +231,13 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
   }
 
   void _showTermsAndPrivacy() {
+    void open(LegalDoc doc) {
+      Navigator.of(context).pop();
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => LegalScreen(doc: doc)),
+      );
+    }
+
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -201,40 +247,39 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
       builder: (sheetContext) {
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 Text(
-                  'Terms & Privacy Policy',
+                  'Terms & Privacy',
                   style: Theme.of(sheetContext).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     color: AppConstants.secondaryDarkColor,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Text(
-                  '• 8SpeedyService connects vehicle owners in Durgapur with independent verified roadside mechanics.\n'
-                  '• Platform booking fee covers dispatch and live tracking. Repair labour & spare parts are settled directly with the mechanic (₹${_appConfig.minVisitCharge} minimum visit charge applies).\n'
-                  '• Your GPS location and phone number are used solely to dispatch your mechanic and share arrival updates.',
-                  style: TextStyle(
-                    color: Colors.blueGrey.shade700,
-                    height: 1.45,
-                    fontSize: 13.5,
-                  ),
+                  '8SpeedyService connects you with independent verified mechanics in Durgapur. '
+                  'The platform fee covers dispatch and live tracking; repair labour and parts are paid directly to the mechanic '
+                  '(₹${_appConfig.minVisitCharge} minimum visit charge).',
+                  style: TextStyle(color: Colors.blueGrey.shade700, height: 1.45, fontSize: 13.5),
                 ),
-                const SizedBox(height: 18),
-                OutlinedButton.icon(
-                  onPressed: () async {
-                    final uri = Uri.parse(AppConstants.termsAndPrivacyUrl);
-                    await launchUrl(
-                      uri,
-                      mode: LaunchMode.externalApplication,
-                    );
-                  },
-                  icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                  label: const Text('Read Full Policy Online'),
+                const SizedBox(height: 8),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.privacy_tip_outlined),
+                  title: const Text('Privacy Policy'),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => open(LegalContent.privacy),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.description_outlined),
+                  title: const Text('Terms of Service'),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => open(LegalContent.terms),
                 ),
               ],
             ),
@@ -277,10 +322,15 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
   }
 
   Future<void> _proceedToIssueSummary() async {
+    final vehicle = _selectedVehicle;
+    if (vehicle == null) {
+      await _addVehicle();
+      return;
+    }
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => IssueSummaryScreen(
-          vehicleType: _selectedVehicleType,
+          vehicle: vehicle,
           pickupLat: _pickupCoords.latitude,
           pickupLng: _pickupCoords.longitude,
           pickupAddress: _pickupAddress,
@@ -290,6 +340,7 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
     );
     if (mounted) {
       _loadCustomerAndConfig();
+      _loadVehicles();
     }
   }
 
@@ -302,12 +353,23 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 0,
-        title: const Text(
-          AppConstants.appName,
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            fontSize: 18,
-          ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset('assets/images/logo.png', width: 30, height: 30),
+            ),
+            const SizedBox(width: 8),
+            const Flexible(
+              child: Text(
+                AppConstants.appName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+              ),
+            ),
+          ],
         ),
         actions: <Widget>[
           Padding(
@@ -384,13 +446,12 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    const CircleAvatar(
-                      radius: 26,
-                      backgroundColor: AppConstants.primaryColor,
-                      child: Icon(
-                        Icons.person_rounded,
-                        color: Colors.white,
-                        size: 30,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        width: 52,
+                        height: 52,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -448,6 +509,19 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
                 },
               ),
               ListTile(
+                leading: const Icon(Icons.two_wheeler_rounded),
+                title: const Text('My Vehicles'),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const MyVehiclesScreen(),
+                    ),
+                  );
+                  if (mounted) _loadVehicles();
+                },
+              ),
+              ListTile(
                 leading: const Icon(Icons.card_giftcard_rounded),
                 title: const Text('Refer & Earn'),
                 onTap: () {
@@ -476,6 +550,19 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
                 onTap: () {
                   Navigator.of(context).pop();
                   _showTermsAndPrivacy();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.manage_accounts_rounded),
+                title: const Text('Account & Privacy'),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const AccountScreen(),
+                    ),
+                  );
+                  if (mounted) _loadCustomerAndConfig();
                 },
               ),
               const Spacer(),
@@ -677,129 +764,80 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Text(
-                        'Select Your Vehicle',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: AppConstants.secondaryDarkColor,
+                      Expanded(
+                        child: Text(
+                          'Which vehicle needs help?',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppConstants.secondaryDarkColor,
+                          ),
                         ),
                       ),
-                      Text(
-                        hasFreeOffer
-                            ? '₹0 Platform Fee'
-                            : '15-min arrival',
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w700,
-                          color: hasFreeOffer
-                              ? AppConstants.successColor
-                              : Colors.blueGrey.shade600,
+                      if (hasFreeOffer)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: AppConstants.successColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Text(
+                            '₹0 Platform Fee',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: AppConstants.successColor,
+                            ),
+                          ),
                         ),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 8,
-                          crossAxisSpacing: 8,
-                          childAspectRatio: 2.35,
-                        ),
-                    itemCount: AppConstants.vehicleOptions.length,
-                    itemBuilder: (context, index) {
-                      final option = AppConstants.vehicleOptions[index];
-                      final isSelected = option.key == _selectedVehicleType;
-                      final fee = _appConfig.feeForVehicle(option.key);
-
-                      return InkWell(
-                        borderRadius: BorderRadius.circular(14),
-                        onTap: () {
-                          setState(() => _selectedVehicleType = option.key);
+                  if (_isLoadingVehicles)
+                    const SizedBox(
+                      height: 128,
+                      child: Center(child: CircularProgressIndicator(strokeWidth: 2.5)),
+                    )
+                  else if (_vehicles.isEmpty)
+                    AddVehicleTile(onTap: _addVehicle, large: true)
+                  else
+                    SizedBox(
+                      height: 128,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _vehicles.length + 1,
+                        separatorBuilder: (_, _) => const SizedBox(width: 10),
+                        itemBuilder: (context, index) {
+                          if (index == _vehicles.length) {
+                            return AddVehicleTile(onTap: _addVehicle);
+                          }
+                          final v = _vehicles[index];
+                          final fee = _appConfig.feeForVehicle(v.category);
+                          return SavedVehicleCard(
+                            vehicle: v,
+                            selected: v.id == _selectedVehicle?.id,
+                            feeLabel: hasFreeOffer ? 'Fee ₹0 (₹$fee)' : 'Platform fee ₹$fee',
+                            onTap: () => setState(() => _selectedVehicle = v),
+                          );
                         },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 160),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? AppConstants.primaryColor.withValues(
-                                    alpha: 0.1,
-                                  )
-                                : AppConstants.backgroundColor,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: isSelected
-                                  ? AppConstants.primaryColor
-                                  : Colors.grey.shade300,
-                              width: isSelected ? 1.8 : 1,
-                            ),
-                          ),
-                          child: Row(
-                            children: <Widget>[
-                              Icon(
-                                option.icon,
-                                size: 26,
-                                color: isSelected
-                                    ? AppConstants.primaryColor
-                                    : AppConstants.secondaryDarkColor,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(
-                                      option.title,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w800,
-                                        color: isSelected
-                                            ? AppConstants.primaryDarkColor
-                                            : AppConstants.secondaryDarkColor,
-                                      ),
-                                    ),
-                                    Text(
-                                      hasFreeOffer
-                                          ? 'Fee ₹0 (was ₹$fee)'
-                                          : 'Platform Fee ₹$fee',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: hasFreeOffer
-                                            ? AppConstants.successColor
-                                            : Colors.blueGrey.shade600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 12),
+                      ),
+                    ),
+                  const SizedBox(height: 14),
                   SizedBox(
-                    height: 52,
+                    height: 54,
                     child: FilledButton.icon(
-                      onPressed: _proceedToIssueSummary,
-                      icon: const Icon(Icons.build_circle_rounded),
+                      onPressed: _isLoadingVehicles ? null : _proceedToIssueSummary,
+                      icon: Icon(
+                        _selectedVehicle == null
+                            ? Icons.add_rounded
+                            : Icons.build_circle_rounded,
+                      ),
                       label: Text(
-                        'Book ${AppConstants.vehicleOptionForKey(_selectedVehicleType).title} Mechanic',
+                        _selectedVehicle == null
+                            ? 'Add your vehicle first'
+                            : 'Book mechanic • ${_selectedVehicle!.model}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 15.5,
                           fontWeight: FontWeight.w700,

@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../core/constants/app_constants.dart';
 import '../../models/booking_model.dart';
 import '../../services/booking_service.dart';
+import '../../widgets/vehicle_widgets.dart';
 import '../6_searching_radar_screen.dart';
 import '../7_live_tracking_screen.dart';
 import '../8_job_completed_screen.dart';
@@ -48,6 +49,25 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
         _isLoading = false;
         _errorMessage = 'Could not load your bookings. Pull down to retry.';
       });
+    }
+  }
+
+  String _statusLabel(String status) {
+    switch (status) {
+      case AppConstants.statusSearching:
+        return 'Searching';
+      case AppConstants.statusAccepted:
+        return 'On the way';
+      case AppConstants.statusArrived:
+        return 'Arrived';
+      case AppConstants.statusInProgress:
+        return 'In progress';
+      case AppConstants.statusCompleted:
+        return 'Completed';
+      case AppConstants.statusCancelled:
+        return 'Cancelled';
+      default:
+        return status;
     }
   }
 
@@ -164,9 +184,6 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                 separatorBuilder: (_, _) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final booking = _bookings[index];
-                  final vehicle = AppConstants.vehicleOptionForKey(
-                    booking.vehicleType,
-                  );
                   final statusColor = _statusColor(booking.status);
 
                   return InkWell(
@@ -184,24 +201,19 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                         children: <Widget>[
                           Row(
                             children: <Widget>[
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: AppConstants.primaryColor.withValues(
-                                    alpha: 0.12,
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Icon(
-                                  vehicle.icon,
-                                  color: AppConstants.primaryColor,
-                                  size: 22,
+                              SizedBox(
+                                width: 64,
+                                child: VehicleImage(
+                                  asset: booking.vehicleAsset,
+                                  height: 40,
                                 ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  vehicle.title,
+                                  booking.vehicleDisplayName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: theme.textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w800,
                                     color: AppConstants.secondaryDarkColor,
@@ -218,7 +230,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: Text(
-                                  booking.status,
+                                  _statusLabel(booking.status),
                                   style: TextStyle(
                                     color: statusColor,
                                     fontWeight: FontWeight.w800,

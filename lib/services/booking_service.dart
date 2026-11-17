@@ -108,11 +108,13 @@ class BookingService {
     required String pickupAddress,
     required double lat,
     required double lng,
+    String? vehicleId,
   }) async {
     final dynamic response = await _client.rpc<dynamic>(
       'create_booking_secure',
       params: <String, dynamic>{
         'p_vehicle_type': vehicleType,
+        'p_vehicle_id': vehicleId,
         'p_issue_tags': issueTags,
         'p_issue_note': issueNote.trim(),
         'p_pickup_address': pickupAddress.trim(),

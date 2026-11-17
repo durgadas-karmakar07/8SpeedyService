@@ -120,11 +120,18 @@ class AppConstants {
   // Support & Legal Links
   // ---------------------------------------------------------------------------
 
-  static const String supportPhoneNumber = '919800000000';
+  static const String supportPhoneNumber = '919635297320';
+  static const String supportPhoneDisplay = '+91 96352 97320';
   static const String whatsappSupportUrl =
-      'https://wa.me/919800000000?text=Hi%208SpeedyService%20Support%2C%20I%20need%20assistance%20in%20Durgapur.';
-  static const String termsAndPrivacyUrl =
-      'https://8speedyservice.in/terms-privacy';
+      'https://wa.me/919635297320?text=Hi%208SpeedyService%20Support%2C%20I%20need%20help%20with%20my%20booking.';
+  // Legal pages (GitHub Pages site from the `8speedyService-legal` repo — see
+  // PRODUCTION_SETUP.md). Required by Google Play.
+  static const String legalBaseUrl =
+      'https://durgadas-karmakar07.github.io/8speedyService-legal';
+  static const String privacyPolicyUrl = '$legalBaseUrl/privacy.html';
+  static const String termsUrl = '$legalBaseUrl/terms.html';
+  static const String deleteAccountUrl = '$legalBaseUrl/delete-account.html';
+  static const String termsAndPrivacyUrl = privacyPolicyUrl;
 
   // ---------------------------------------------------------------------------
   // SharedPreferences Keys
@@ -172,7 +179,7 @@ class AppConstants {
 
   static const List<String> issueTags = <String>[
     'Puncture / Tyre Flat',
-    'Start Nahi Ho Raha',
+    'Won\'t Start',
     'Battery Dead',
     'Chain / Brake',
     'Accident / Towing',

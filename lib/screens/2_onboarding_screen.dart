@@ -6,7 +6,7 @@ import '../core/constants/app_constants.dart';
 import '../services/auth_service.dart';
 import '3_phone_login_screen.dart';
 
-/// Introduces 8SpeedyService's 15-minute roadside repair promise in Durgapur
+/// Introduces 8SpeedyService's fast roadside repair service in Durgapur
 /// and highlights the ₹0 platform fee launch offer.
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -23,9 +23,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   static const List<_OnboardingSlide> _slides = <_OnboardingSlide>[
     _OnboardingSlide(
       icon: Icons.bolt_rounded,
-      title: '15-Minute On-Spot Arrival',
+      title: 'Nearby Mechanic, Fast Arrival',
       description:
-          'Stranded in City Centre, Benachity, Bidhannagar, or anywhere in Durgapur? A verified mechanic reaches your exact pin in 15 minutes.',
+          'Stranded in City Centre, Benachity, Bidhannagar, or anywhere in Durgapur? The nearest verified mechanic comes to your exact pin — track them live on the map.',
     ),
     _OnboardingSlide(
       icon: Icons.two_wheeler_rounded,

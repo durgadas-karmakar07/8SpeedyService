@@ -73,7 +73,7 @@ class PaymentService {
     try {
       _razorpay.open(options);
     } catch (error) {
-      _onError?.call('Payment screen open nahi ho paya. Please retry.');
+      _onError?.call('Could not open the payment screen. Please try again.');
     }
   }
 

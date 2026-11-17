@@ -127,7 +127,7 @@ class _SplashScreenState extends State<SplashScreen> {
           child: AlertDialog(
             title: const Text('Update Required'),
             content: const Text(
-              '8SpeedyService ka naya version aa gaya hai. Behtar aur safe service ke liye app update karein.',
+              'A new version of 8SpeedyService is available. Please update the app to continue.',
             ),
             actions: <Widget>[
               FilledButton(
@@ -157,7 +157,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppConstants.secondaryDarkColor,
+      backgroundColor: AppConstants.primaryColor,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -166,40 +166,23 @@ class _SplashScreenState extends State<SplashScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Container(
-                  width: 104,
-                  height: 104,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: <Color>[
-                        AppConstants.primaryColor,
-                        AppConstants.primaryDarkColor,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(28),
+                    borderRadius: BorderRadius.circular(30),
                     boxShadow: <BoxShadow>[
                       BoxShadow(
-                        color: AppConstants.primaryColor.withValues(alpha: 0.4),
+                        color: Colors.black.withValues(alpha: 0.18),
                         blurRadius: 24,
                         offset: const Offset(0, 10),
                       ),
                     ],
                   ),
-                  child: const Stack(
-                    alignment: Alignment.center,
-                    children: <Widget>[
-                      Icon(
-                        Icons.settings_rounded,
-                        size: 72,
-                        color: Colors.white24,
-                      ),
-                      Icon(
-                        Icons.build_rounded,
-                        size: 46,
-                        color: Colors.white,
-                      ),
-                    ],
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(30),
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      width: 112,
+                      height: 112,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -222,9 +205,9 @@ class _SplashScreenState extends State<SplashScreen> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Text(
-                    'Durgapur • 15-Min On-Spot Mechanic',
+                    'Durgapur • Roadside mechanic at your location',
                     style: TextStyle(
-                      color: Colors.white70,
+                      color: Colors.white,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
@@ -238,14 +221,14 @@ class _SplashScreenState extends State<SplashScreen> {
                     child: CircularProgressIndicator(
                       strokeWidth: 3,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        AppConstants.primaryColor,
+                        Colors.white,
                       ),
                     ),
                   ),
                   const SizedBox(height: 14),
                   const Text(
                     'Checking active bookings...',
-                    style: TextStyle(color: Colors.white60, fontSize: 13),
+                    style: TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                 ] else if (_errorMessage != null) ...<Widget>[
                   Container(
@@ -292,7 +275,8 @@ class _SplashScreenState extends State<SplashScreen> {
                               child: FilledButton(
                                 onPressed: _bootstrapApp,
                                 style: FilledButton.styleFrom(
-                                  backgroundColor: AppConstants.primaryColor,
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: AppConstants.primaryDarkColor,
                                 ),
                                 child: const Text('Retry'),
                               ),

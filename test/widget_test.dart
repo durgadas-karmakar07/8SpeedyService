@@ -126,7 +126,7 @@ void main() {
         find.text('LAUNCH OFFER: First 5 Bookings Platform Fee ₹0'),
         findsOneWidget,
       );
-      expect(find.text('15-Minute On-Spot Arrival'), findsOneWidget);
+      expect(find.text('Nearby Mechanic, Fast Arrival'), findsOneWidget);
       expect(find.text('Next'), findsOneWidget);
 
       await tester.tap(find.text('Next'));

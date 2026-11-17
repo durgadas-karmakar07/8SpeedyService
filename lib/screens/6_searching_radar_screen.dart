@@ -391,7 +391,7 @@ class _SearchingRadarScreenState extends State<SearchingRadarScreen>
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'Finding Nearby Verified Mechanics...',
+                      'Finding a mechanic for your ${_booking.vehicleDisplayName}...',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w800,
                         color: AppConstants.secondaryDarkColor,
