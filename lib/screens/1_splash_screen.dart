@@ -216,14 +216,28 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
                 const SizedBox(height: 44),
                 if (_isChecking) ...<Widget>[
-                  const RoadLoader(
-                    color: Colors.white,
-                    width: 240,
-                    messages: <String>[
-                      'Starting the engine…',
-                      'Checking your bookings…',
-                      'Finding mechanics near you…',
-                    ],
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: <BoxShadow>[
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: const RoadLoader(
+                      color: AppConstants.secondaryDarkColor,
+                      width: 220,
+                      messages: <String>[
+                        'Starting the engine…',
+                        'Checking your bookings…',
+                        'Finding mechanics near you…',
+                      ],
+                    ),
                   ),
                 ] else if (_errorMessage != null) ...<Widget>[
                   Container(
