@@ -131,6 +131,7 @@ class AppConstants {
   static const String privacyPolicyUrl = '$legalBaseUrl/privacy.html';
   static const String termsUrl = '$legalBaseUrl/terms.html';
   static const String deleteAccountUrl = '$legalBaseUrl/delete-account.html';
+  static const String websiteUrl = '$legalBaseUrl/';
   static const String termsAndPrivacyUrl = privacyPolicyUrl;
 
   // ---------------------------------------------------------------------------

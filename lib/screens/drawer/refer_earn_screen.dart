@@ -7,6 +7,7 @@ import '../../core/utils/error_helper.dart';
 import '../../models/customer_model.dart';
 import '../../services/auth_service.dart';
 import '../../services/booking_service.dart';
+import '../../widgets/speedy_loader.dart';
 
 /// Displays the customer's referral code, remaining free booking credits,
 /// and WhatsApp sharing actions.
@@ -138,7 +139,7 @@ class _ReferEarnScreenState extends State<ReferEarnScreen> {
       backgroundColor: AppConstants.backgroundColor,
       appBar: AppBar(title: const Text('Refer & Earn')),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: WheelLoader())
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Center(
@@ -331,14 +332,7 @@ class _ReferEarnScreenState extends State<ReferEarnScreen> {
                                         ? null
                                         : _applyFriendCode,
                                     child: _isApplyingCode
-                                        ? const SizedBox(
-                                            width: 18,
-                                            height: 18,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: Colors.white,
-                                            ),
-                                          )
+                                        ? const DotsLoader()
                                         : const Text('Apply'),
                                   ),
                                 ],

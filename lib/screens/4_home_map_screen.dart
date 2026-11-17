@@ -25,6 +25,7 @@ import 'drawer/my_bookings_screen.dart';
 import 'drawer/refer_earn_screen.dart';
 import 'vehicles/add_vehicle_screen.dart';
 import 'vehicles/my_vehicles_screen.dart';
+import '../widgets/speedy_loader.dart';
 
 /// Main booking entry screen featuring an interactive OpenStreetMap pickup pin,
 /// live free-credits badge, navigation drawer, and vehicle type selector.
@@ -281,6 +282,19 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => open(LegalContent.terms),
                 ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.public_rounded),
+                  title: const Text('Visit our website'),
+                  trailing: const Icon(Icons.open_in_new_rounded, size: 18),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    launchUrl(
+                      Uri.parse(AppConstants.websiteUrl),
+                      mode: LaunchMode.externalApplication,
+                    );
+                  },
+                ),
               ],
             ),
           ),
@@ -411,11 +425,7 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
                     ),
                     const SizedBox(width: 5),
                     _isLoadingCredits
-                        ? const SizedBox(
-                            width: 12,
-                            height: 12,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
+                        ? const WheelLoader(size: 12)
                         : Text(
                             'Free Left: $freeBookingsLeft',
                             style: TextStyle(
@@ -722,11 +732,7 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
                       ),
                     ),
                     icon: _isLocating
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
+                        ? const WheelLoader(size: 16)
                         : const Icon(
                             Icons.gps_fixed_rounded,
                             color: AppConstants.primaryColor,
@@ -796,7 +802,7 @@ class _HomeMapScreenState extends State<HomeMapScreen> {
                   if (_isLoadingVehicles)
                     const SizedBox(
                       height: 128,
-                      child: Center(child: CircularProgressIndicator(strokeWidth: 2.5)),
+                      child: Center(child: WheelLoader(size: 40)),
                     )
                   else if (_vehicles.isEmpty)
                     AddVehicleTile(onTap: _addVehicle, large: true)

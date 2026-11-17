@@ -7,6 +7,7 @@ import '../../models/customer_vehicle.dart';
 import '../../services/vehicle_service.dart';
 import '../../widgets/vehicle_widgets.dart';
 import 'add_vehicle_screen.dart';
+import '../../widgets/speedy_loader.dart';
 
 /// Drawer -> My Vehicles: list, add and remove saved vehicles.
 class MyVehiclesScreen extends StatefulWidget {
@@ -103,7 +104,7 @@ class _MyVehiclesScreenState extends State<MyVehiclesScreen> {
             if (_loading)
               const Padding(
                 padding: EdgeInsets.all(48),
-                child: Center(child: CircularProgressIndicator()),
+                child: const Center(child: WheelLoader()),
               )
             else if (_error != null)
               Padding(

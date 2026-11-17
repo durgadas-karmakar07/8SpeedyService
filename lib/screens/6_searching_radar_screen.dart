@@ -12,6 +12,7 @@ import '../models/mechanic_model.dart';
 import '../services/booking_service.dart';
 import '4_home_map_screen.dart';
 import '7_live_tracking_screen.dart';
+import '../widgets/speedy_loader.dart';
 
 /// Displays an animated pulsing radar over the pickup map while expanding
 /// `get_nearby_mechanics` search radii (`3000m -> 6000m -> 10000m`) every 45s
@@ -445,13 +446,7 @@ class _SearchingRadarScreenState extends State<SearchingRadarScreen>
                           ),
                         ),
                         icon: _isCancelling
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
+                            ? const WheelLoader(size: 16)
                             : const Icon(Icons.close_rounded),
                         label: Text(
                           _isCancelling ? 'Cancelling...' : 'Cancel Request',

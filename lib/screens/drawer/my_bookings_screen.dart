@@ -7,6 +7,7 @@ import '../../widgets/vehicle_widgets.dart';
 import '../6_searching_radar_screen.dart';
 import '../7_live_tracking_screen.dart';
 import '../8_job_completed_screen.dart';
+import '../../widgets/speedy_loader.dart';
 
 /// Displays the customer's booking history and allows resuming active
 /// bookings or rating completed services.
@@ -129,7 +130,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
       body: RefreshIndicator(
         onRefresh: _loadBookings,
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: RoadLoader(messages: <String>['Loading your bookings…']))
             : _errorMessage != null
             ? ListView(
                 padding: const EdgeInsets.all(24),

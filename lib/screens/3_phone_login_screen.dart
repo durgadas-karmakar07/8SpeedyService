@@ -12,6 +12,7 @@ import '../services/booking_service.dart';
 import '4_home_map_screen.dart';
 import '6_searching_radar_screen.dart';
 import '7_live_tracking_screen.dart';
+import '../widgets/speedy_loader.dart';
 
 /// +91 Indian mobile number and 6-digit SMS OTP authentication screen.
 class PhoneLoginScreen extends StatefulWidget {
@@ -374,14 +375,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                           ? null
                           : (_otpSent ? _verifyOtp : _sendOtp),
                       child: _isLoading
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: Colors.white,
-                              ),
-                            )
+                          ? const DotsLoader()
                           : Text(
                               _otpSent ? 'Verify & Continue' : 'Send OTP',
                               style: const TextStyle(

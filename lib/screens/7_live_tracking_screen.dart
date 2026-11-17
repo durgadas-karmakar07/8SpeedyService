@@ -14,6 +14,7 @@ import '../services/booking_service.dart';
 import '4_home_map_screen.dart';
 import '6_searching_radar_screen.dart';
 import '8_job_completed_screen.dart';
+import '../widgets/speedy_loader.dart';
 
 /// Displays live mechanic location tracking over OpenStreetMap (top 60%)
 /// and mechanic profile, call action, booking status, and Start OTP (bottom 40%).
@@ -267,7 +268,9 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
     final booking = _booking;
     if (booking == null) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: const Center(
+          child: RoadLoader(messages: <String>['Connecting to your mechanic…', 'Loading live map…']),
+        ),
       );
     }
 

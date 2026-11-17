@@ -7,6 +7,7 @@ import '../../core/utils/error_helper.dart';
 import '../../models/customer_vehicle.dart';
 import '../../services/vehicle_service.dart';
 import '../../widgets/vehicle_widgets.dart';
+import '../../widgets/speedy_loader.dart';
 
 /// 4 steps: Type -> Brand -> Model -> Number & fuel. Returns the saved
 /// [CustomerVehicle] via `Navigator.pop`.
@@ -442,11 +443,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
           child: FilledButton.icon(
             onPressed: _saving ? null : _save,
             icon: _saving
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
-                  )
+                ? const DotsLoader()
                 : const Icon(Icons.check_rounded),
             label: const Text('Save vehicle', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
           ),

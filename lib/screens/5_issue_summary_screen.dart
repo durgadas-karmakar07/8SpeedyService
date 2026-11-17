@@ -14,6 +14,7 @@ import '../services/auth_service.dart';
 import '../services/booking_service.dart';
 import '../services/payment_service.dart';
 import '6_searching_radar_screen.dart';
+import '../widgets/speedy_loader.dart';
 
 /// Issue selection, dynamic launch-offer pricing summary, and booking
 /// confirmation (with Razorpay UPI checkout when platform fee > ₹0).
@@ -314,7 +315,11 @@ class _IssueSummaryScreenState extends State<IssueSummaryScreen> {
       ),
       body: SafeArea(
         child: _isLoadingConfig
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(
+                child: RoadLoader(
+                  messages: <String>['Loading latest prices…', 'Checking your free credits…'],
+                ),
+              )
             : _loadError != null
             ? Center(
                 child: Padding(
@@ -598,14 +603,7 @@ class _IssueSummaryScreenState extends State<IssueSummaryScreen> {
                                 ? null
                                 : _confirmAndCreateBooking,
                             child: _isSubmitting
-                                ? const SizedBox(
-                                    width: 22,
-                                    height: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.5,
-                                      color: Colors.white,
-                                    ),
-                                  )
+                                ? const DotsLoader()
                                 : Text(
                                     _pendingPaymentBooking != null
                                         ? 'Retry UPI Payment (₹${_pendingPaymentBooking!.amount})'

@@ -7,6 +7,7 @@ import '../models/booking_model.dart';
 import '../models/mechanic_model.dart';
 import '../services/booking_service.dart';
 import '4_home_map_screen.dart';
+import '../widgets/speedy_loader.dart';
 
 /// Displays job completion summary, interactive 1-to-5 star rating bar,
 /// and optional review box before returning to [HomeMapScreen].
@@ -264,14 +265,7 @@ class _JobCompletedScreenState extends State<JobCompletedScreen> {
                     child: FilledButton(
                       onPressed: _isSubmitting ? null : _submitRating,
                       child: _isSubmitting
-                          ? const SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: Colors.white,
-                              ),
-                            )
+                          ? const DotsLoader()
                           : const Text(
                               'Submit Rating & Back to Home',
                               style: TextStyle(

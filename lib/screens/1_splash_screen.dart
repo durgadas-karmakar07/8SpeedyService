@@ -11,6 +11,7 @@ import '3_phone_login_screen.dart';
 import '4_home_map_screen.dart';
 import '6_searching_radar_screen.dart';
 import '7_live_tracking_screen.dart';
+import '../widgets/speedy_loader.dart';
 
 /// Branded launch screen that checks authentication state and restores any
 /// ongoing mechanic booking before routing the customer.
@@ -215,20 +216,14 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
                 const SizedBox(height: 44),
                 if (_isChecking) ...<Widget>[
-                  const SizedBox(
-                    width: 28,
-                    height: 28,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  const Text(
-                    'Checking active bookings...',
-                    style: TextStyle(color: Colors.white70, fontSize: 13),
+                  const RoadLoader(
+                    color: Colors.white,
+                    width: 240,
+                    messages: <String>[
+                      'Starting the engine…',
+                      'Checking your bookings…',
+                      'Finding mechanics near you…',
+                    ],
                   ),
                 ] else if (_errorMessage != null) ...<Widget>[
                   Container(

@@ -8,6 +8,7 @@ import '../../models/customer_model.dart';
 import '../../services/auth_service.dart';
 import '../3_phone_login_screen.dart';
 import 'legal_screen.dart';
+import '../../widgets/speedy_loader.dart';
 
 /// Profile name, legal links and permanent account deletion.
 class AccountScreen extends StatefulWidget {
@@ -149,7 +150,7 @@ class _AccountScreenState extends State<AccountScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Account & Privacy')),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: WheelLoader())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: <Widget>[
@@ -188,11 +189,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             style: FilledButton.styleFrom(minimumSize: const Size(96, 42)),
                             onPressed: _savingName ? null : _saveName,
                             child: _savingName
-                                ? const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                                  )
+                                ? const DotsLoader()
                                 : const Text('Save'),
                           ),
                         ],
@@ -210,6 +207,10 @@ class _AccountScreenState extends State<AccountScreen> {
                       const Divider(height: 1),
                       _link(Icons.description_outlined, 'Terms of Service', () => _openDoc(LegalContent.terms)),
                       const Divider(height: 1),
+                      _link(Icons.info_outline_rounded, 'How account deletion works', () => _open(AppConstants.deleteAccountUrl), external: true),
+                      const Divider(height: 1),
+                      _link(Icons.public_rounded, 'Website', () => _open(AppConstants.websiteUrl), external: true),
+                      const Divider(height: 1),
                       _link(Icons.support_agent_rounded, 'WhatsApp Support (${AppConstants.supportPhoneDisplay})', () => _open(AppConstants.whatsappSupportUrl), external: true),
                     ],
                   ),
@@ -220,7 +221,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   decoration: _card(),
                   child: ListTile(
                     leading: _deleting
-                        ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5))
+                        ? const WheelLoader(size: 18)
                         : const Icon(Icons.delete_forever_rounded, color: Colors.red),
                     title: const Text('Delete my account', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
                     subtitle: const Text('Permanently remove your account and personal data'),
