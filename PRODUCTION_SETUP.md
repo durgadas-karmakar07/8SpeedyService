@@ -20,6 +20,9 @@ Order mein follow karein.
 | **Design** | Poppins font, naya splash/login, vehicle illustrations (`assets/vehicles/`, original — koi brand logo/photo nahi) |
 | **Legal** | `legal-site/` — Privacy Policy, Terms, Partner Terms, Delete-account page |
 | **Mechanic Partner app** | Alag repo: login, self-registration + admin verify, Online/Offline, nearby requests, job flow, history, account deletion |
+| **Call-style job alerts** (20 Nov) | Partner app: naya request aate hi phone-call jaisa full screen + original "8Speedy" ringtone (lock screen par bhi) |
+| **Voice note** (20 Nov) | Customer apni awaaz mein problem bol sakta hai (60 sec); paas ke mechanics sun sakte hain — private bucket + RLS |
+| **Test APK (CI)** (20 Nov) | Har push par GitHub Actions: analyze + test + obfuscated APK + security scan + emulator run → `test-build` release |
 
 ---
 
@@ -32,6 +35,11 @@ Order mein follow karein.
    3. `supabase/migrations/20261118000003_vehicles_and_account_deletion.sql`
       ✅ **18 Nov 2026 ko aapke live project par Claude ne Supabase connector se laga diya hai** — dobara chalane ki zaroorat nahi
       (chalaoge to bhi safe hai, file mein koi DROP/DELETE nahi hai).
+   4. `supabase/migrations/20261120000004_voice_notes.sql` — voice notes (bucket, policies, RPCs)
+   5. `supabase/migrations/20261120000005_security_hardening.sql` — security audit fixes (20 Nov)
+      ⚠️ 4 aur 5 abhi live DB par **nahi** lage hain — Claude ko permission dein ya SQL Editor mein khud chalayein.
+      Jab tak nahi lagte: Partner app purane RPC par chalta hai (voice note nahi dikhega) aur customer ka voice
+      note upload "could not be sent" dikhayega — booking phir bhi ho jaayegi.
 3. **Database → Extensions** → `pg_cron` enable, phir pehli file ka "AUTO-EXPIRE" wala `DO $$ … $$;` block dobara run.
 4. **Project Settings → API** se `Project URL` aur `anon / publishable key` → `env/prod.json` (dono repos mein).
 
@@ -65,7 +73,7 @@ supabase secrets set RAZORPAY_KEY_ID=rzp_live_xxx RAZORPAY_KEY_SECRET=xxx RAZORP
 supabase functions deploy razorpay-create-order
 supabase functions deploy razorpay-verify-payment
 supabase functions deploy razorpay-webhook --no-verify-jwt
-supabase functions deploy delete-account     # ✅ 18 Nov ko deploy ho chuka hai
+supabase functions deploy delete-account     # 20 Nov: voice notes bhi delete karta hai — dobara deploy karein
 ```
 
 3. Razorpay → **Settings → Webhooks → Add**:
@@ -143,6 +151,23 @@ flutter build appbundle --release --obfuscate --split-debug-info=build/symbols -
 ```
 Output: `build/app/outputs/bundle/release/app-release.aab`. `build/symbols` folder sambhal kar rakhein (crash samajhne ke liye).
 
+## Step 6b — Test APK dosto ko bhejna (bina PC ke)
+
+GitHub Actions har push par dono apps ka **test APK** banata hai (file: `.github/workflows/build-apk.yml`):
+
+| App | Download link (phone par kholo → Install) |
+|---|---|
+| Customer | https://github.com/durgadas-karmakar07/8SpeedyService/releases/download/test-build/8SpeedyService-test.apk |
+| Partner | https://github.com/durgadas-karmakar07/8SpeedyService.Partner/releases/download/test-build/8Speedy-Partner-test.apk |
+
+- Pehli baar phone poochega "Install unknown apps" — browser/WhatsApp ko allow karein.
+- Test APK ek CI test key se sign hota hai, isliye naya build purane ke upar install ho jaata hai.
+  (Agar 7 din tak koi build na ho to key badal sakti hai — tab purana app uninstall karke naya daalein.)
+- Play Store ke liye `.aab` hamesha **apne PC** par apni upload key se banayein (Step 6). CI wala APK Play Store par mat daalein.
+- Har build ke logs, security report aur emulator screenshots: release `ci-logs-test-build`.
+- Optional: repo **Settings → Secrets and variables → Actions** mein `SUPABASE_URL` aur `SUPABASE_ANON_KEY` daal dein;
+  na ho to workflow project ki *publishable* key use karta hai (yeh public hi hoti hai — har APK ke andar hoti hai, data RLS se surakshit).
+
 ## Step 7 — Play Console
 
 1. https://play.google.com/console → Developer account ($25, ek baar). Personal account ke liye
@@ -151,7 +176,9 @@ Output: `build/app/outputs/bundle/release/app-release.aab`. `build/symbols` fold
 2. **Do apps** banayein: `8SpeedyService` aur `8Speedy Partner`.
 3. Listing text, icon, feature graphic, Data safety aur App content ke jawab:
    - Customer: `store/PLAY_STORE_LISTING.md` (is repo mein)
-   - Partner: `store/PLAY_STORE_LISTING.md` (Partner repo mein) — **Foreground service declaration** zaroor bharein
+   - Partner: `store/PLAY_STORE_LISTING.md` (Partner repo mein) — **Foreground service declaration** aur
+     **Full-screen intent declaration** (call-style alerts; jawab "No, calling/alarm app nahi") zaroor bharein
+   - Customer Data safety mein naya: **Audio → Voice or sound recordings** (optional voice note)
 4. Testing → Closed testing → `.aab` upload → testers ke Gmail add karein.
 
 ## Step 8 — Launch se pehle test checklist
@@ -169,6 +196,32 @@ Output: `build/app/outputs/bundle/release/app-release.aab`. `build/symbols` fold
 - [ ] Partner delete account → mechanics row "Deleted Partner"
 - [ ] App icon, splash (orange / navy) aur Android 12+ splash sahi dikhe
 - [ ] `min_android_version = 9.0.0` → force-update dialog; phir wapas `1.0.0`
+- [ ] Partner Online → doosre phone se booking → Partner phone **ring kare** (app khula ho, background mein ho, aur screen lock ho — teeno)
+- [ ] Ringing screen: Accept → job screen; Decline → request list mein rehti hai; 40 sec baad "missed"
+- [ ] Android 14+: "Allow full-screen alerts" banner → setting on → lock screen par full screen dikhe
+- [ ] Customer: mic → 10 sec bolo → play karke suno → booking → Partner mein request par ▶ voice note bajey
+- [ ] Customer voice note ke saath delete account → Storage → voice-notes bucket mein uska folder khali
+
+## Security audit — 20 Nov 2026 (10 "hack" attempts)
+
+| # | Attack (public APK key ke saath) | Result |
+|---|---|---|
+| 1 | Bina login sab tables padhna (customers, bookings, mechanics) | ✅ Blocked — anon ko SELECT nahi |
+| 2 | Login karke doosre users ka data padhna | ✅ Blocked — RLS: random user ko 5 mein se 0 bookings dikhi |
+| 3 | Direct write: khud ko PAID / 999 free credits dena | ✅ Blocked — sirf apna naam edit ho sakta hai, baaki sab server RPC se |
+| 4 | Mechanic ka customer ka Start OTP padhna | ✅ Blocked — kisi mechanic RPC/realtime mein OTP nahi |
+| 5 | Fake payment (signature / amount / doosri booking ka payment) | ✅ Blocked — HMAC + Razorpay API + amount + order check |
+| 6 | Doosre ka account delete / unverified mechanic se job lena | ✅ Blocked |
+| 7 | **PostGIS `spatial_ref_sys` table ko public key se wipe karna (poora app band)** | ❌ **Possible tha** → fix: write-guard trigger (migration 005) |
+| 8 | OTP guess: 4 galat try → job release → doosra mechanic same OTP par 5 aur try | ⚠️ Kamzori → fix: release par naya OTP |
+| 9 | Mechanic ka fake / galat GPS location bhejna | ⚠️ Kamzori → fix: India ke bahar / adhure coordinates reject |
+| 10 | APK kholkar secret keys dhoondhna | ✅ Koi secret nahi (CI har build scan karta hai); code obfuscated; not debuggable; backup off; http block; 16 KB aligned; targetSdk 36 |
+
+Extra fixes: purana customer job ke 24 ghante baad tak mechanic ki live location dekh sakta tha → ab 2 ghante;
+Partner app ka exported activity spoof (lock-screen) → one-time token; voice-note bucket private + 3 upload limit.
+
+Abhi bhi bacha (Supabase ki taraf se, hamare control mein nahi): PostGIS ke `st_estimatedextent` functions public hain
+(sirf approx. map extent batate hain — low risk). Supabase support se PostGIS ko `extensions` schema mein shift karwa sakte hain.
 
 ## Note — OpenStreetMap tiles
 `tile.openstreetmap.org` launch / kam traffic ke liye theek hai, lekin heavy commercial use allow nahi.
