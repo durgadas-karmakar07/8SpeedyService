@@ -4,6 +4,7 @@
 //   1. Verifies the caller's JWT
 //   2. delete_account_data(uid): removes / anonymises personal data
 //      (booking rows stay without identity for payment & tax records)
+//      + deletes the user's voice notes from Storage
 //   3. Soft-deletes the auth user: sessions end, phone number is freed.
 // Self-contained (no shared imports) so it can be deployed on its own.
 
@@ -56,6 +57,19 @@ Deno.serve(async (req) => {
     if (dataError) {
       // Business-rule messages (active job / booking) are safe to show.
       return json({ error: dataError.message }, 409);
+    }
+
+    // Voice notes the customer recorded (private bucket, folder = user id).
+    try {
+      const bucket = admin.storage.from("voice-notes");
+      for (let round = 0; round < 10; round++) {
+        const { data: files, error: listError } = await bucket.list(userId, { limit: 100 });
+        if (listError || !files || files.length === 0) break;
+        await bucket.remove(files.map((f) => `${userId}/${f.name}`));
+        if (files.length < 100) break;
+      }
+    } catch (e) {
+      console.error("voice note cleanup failed", userId, e);
     }
 
     const { error: authError } = await admin.auth.admin.deleteUser(userId, true);

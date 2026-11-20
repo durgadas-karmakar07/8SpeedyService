@@ -65,6 +65,7 @@ Privacy Policy: https://durgadas-karmakar07.github.io/8SpeedyService/privacy.htm
 | Personal info → Phone number | Yes | Yes (with assigned mechanic) | Required | Account management, App functionality |
 | Financial info → Purchase history | Yes | No | Required | App functionality |
 | App activity → Other user-generated content (reviews, notes) | Yes | No | Optional | App functionality |
+| Audio → Voice or sound recordings (voice note about the problem) | Yes | Yes (with nearby / assigned mechanic) | Optional | App functionality |
 | App info & performance | No | — | — | — |
 | Device or other IDs | No | — | — | — |
 
@@ -72,5 +73,6 @@ Privacy Policy: https://durgadas-karmakar07.github.io/8SpeedyService/privacy.htm
 
 ## Permissions used
 - `ACCESS_FINE_LOCATION` / `COARSE` — pickup point (sirf app khula ho tab)
+- `RECORD_AUDIO` — optional voice note (sirf mic button dabane par; background mein kabhi nahi)
 - `INTERNET`
 - Background location: **No**

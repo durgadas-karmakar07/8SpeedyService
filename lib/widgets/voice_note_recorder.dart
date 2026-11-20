@@ -277,6 +277,7 @@ class _VoiceNoteRecorderState extends State<VoiceNoteRecorder>
         const SizedBox(width: 12),
         const Expanded(
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
@@ -301,6 +302,7 @@ class _VoiceNoteRecorderState extends State<VoiceNoteRecorder>
   Widget _recording() {
     final max = AppConstants.voiceNoteMaxLength;
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Row(
           children: <Widget>[
@@ -393,6 +395,7 @@ class _VoiceNoteRecorderState extends State<VoiceNoteRecorder>
         const SizedBox(width: 12),
         Expanded(
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Row(

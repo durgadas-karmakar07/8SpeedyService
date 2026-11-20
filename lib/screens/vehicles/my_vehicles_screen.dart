@@ -104,7 +104,7 @@ class _MyVehiclesScreenState extends State<MyVehiclesScreen> {
             if (_loading)
               const Padding(
                 padding: EdgeInsets.all(48),
-                child: const Center(child: WheelLoader()),
+                child: Center(child: WheelLoader()),
               )
             else if (_error != null)
               Padding(

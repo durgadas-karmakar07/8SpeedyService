@@ -268,7 +268,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
     final booking = _booking;
     if (booking == null) {
       return const Scaffold(
-        body: const Center(
+        body: Center(
           child: RoadLoader(messages: <String>['Connecting to your mechanic…', 'Loading live map…']),
         ),
       );
