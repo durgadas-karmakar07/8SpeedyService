@@ -160,6 +160,8 @@ GitHub Actions har push par dono apps ka **test APK** banata hai (file: `.github
 | Customer | https://github.com/durgadas-karmakar07/8SpeedyService/releases/download/test-build/8SpeedyService-test.apk |
 | Partner | https://github.com/durgadas-karmakar07/8SpeedyService.Partner/releases/download/test-build/8Speedy-Partner-test.apk |
 
+> Jab tak branch `claude/call-alerts-voice-notes` main mein merge nahi hoti, naya build `test-build` ki jagah
+> `preview-build` release par hai — link mein `test-build` ko `preview-build` se badal dein.
 - Pehli baar phone poochega "Install unknown apps" — browser/WhatsApp ko allow karein.
 - Test APK ek CI test key se sign hota hai, isliye naya build purane ke upar install ho jaata hai.
   (Agar 7 din tak koi build na ho to key badal sakti hai — tab purana app uninstall karke naya daalein.)
