@@ -114,6 +114,10 @@ class AppConstants {
   // ---------------------------------------------------------------------------
 
   static const List<int> searchRadiiMeters = <int>[3000, 6000, 10000];
+
+  /// Voice note describing the problem (private Supabase Storage bucket).
+  static const String voiceNoteBucket = 'voice-notes';
+  static const Duration voiceNoteMaxLength = Duration(seconds: 60);
   static const Duration radarExpansionInterval = Duration(seconds: 45);
 
   // ---------------------------------------------------------------------------

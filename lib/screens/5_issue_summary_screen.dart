@@ -13,8 +13,10 @@ import '../widgets/vehicle_widgets.dart';
 import '../services/auth_service.dart';
 import '../services/booking_service.dart';
 import '../services/payment_service.dart';
+import '../services/voice_service.dart';
 import '6_searching_radar_screen.dart';
 import '../widgets/speedy_loader.dart';
+import '../widgets/voice_note_recorder.dart';
 
 /// Issue selection, dynamic launch-offer pricing summary, and booking
 /// confirmation (with Razorpay UPI checkout when platform fee > ₹0).
@@ -45,6 +47,9 @@ class _IssueSummaryScreenState extends State<IssueSummaryScreen> {
   final TextEditingController _noteController = TextEditingController();
 
   final Set<String> _selectedIssues = <String>{};
+
+  /// Optional recorded description, uploaded right after the booking is made.
+  VoiceClip? _voiceClip;
 
   AppConfigModel? _appConfig;
   CustomerModel? _customer;
@@ -151,6 +156,8 @@ class _IssueSummaryScreenState extends State<IssueSummaryScreen> {
       );
 
       if (!mounted) return;
+      await _sendVoiceNote(result.bookingId);
+      if (!mounted) return;
 
       if (!result.paymentRequired) {
         _navigateToSearchingRadar(result, isFreeOffer: true);
@@ -240,6 +247,28 @@ class _IssueSummaryScreenState extends State<IssueSummaryScreen> {
       _showError(
         error,
         'Payment received but not confirmed yet. Tap the button again to retry — you will not be charged twice.',
+      );
+    }
+  }
+
+  /// Uploads the voice note for [bookingId]. A failure never blocks the
+  /// booking — the typed issues and note are already saved.
+  Future<void> _sendVoiceNote(String bookingId) async {
+    final clip = _voiceClip;
+    if (clip == null) return;
+    try {
+      await VoiceService.instance
+          .uploadForBooking(bookingId: bookingId, clip: clip)
+          .timeout(const Duration(seconds: 25));
+      _voiceClip = null;
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Booking confirmed, but the voice note could not be sent. Mechanics will see your typed details.',
+          ),
+        ),
       );
     }
   }
@@ -465,7 +494,12 @@ class _IssueSummaryScreenState extends State<IssueSummaryScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 4),
+                          VoiceNoteRecorder(
+                            enabled: !_isSubmitting && _pendingPaymentBooking == null,
+                            onChanged: (clip) => _voiceClip = clip,
+                          ),
+                          const SizedBox(height: 14),
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(

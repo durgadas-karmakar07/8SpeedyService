@@ -59,3 +59,4 @@ app.*.map.json
 # Mechanic Partner app lives in its own repo: 8SpeedyService.Partner
 /mechanic_app/
 /_to_delete/
+test_preview/goldens/
