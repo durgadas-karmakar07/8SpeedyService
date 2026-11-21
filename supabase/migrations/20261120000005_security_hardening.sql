@@ -31,7 +31,7 @@ GRANT USAGE ON SCHEMA private TO authenticated, service_role;
 -- 1. [HIGH] spatial_ref_sys: block writes coming from the API roles
 -- -----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION private.block_api_writes()
-RETURNS TRIGGER LANGUAGE plpgsql AS $$
+RETURNS TRIGGER LANGUAGE plpgsql SET search_path = '' AS $$
 BEGIN
     IF current_user IN ('anon', 'authenticated') THEN
         RAISE EXCEPTION 'This table is read-only.' USING ERRCODE = '42501';

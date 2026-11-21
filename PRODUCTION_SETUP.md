@@ -37,9 +37,8 @@ Order mein follow karein.
       (chalaoge to bhi safe hai, file mein koi DROP/DELETE nahi hai).
    4. `supabase/migrations/20261120000004_voice_notes.sql` — voice notes (bucket, policies, RPCs)
    5. `supabase/migrations/20261120000005_security_hardening.sql` — security audit fixes (20 Nov)
-      ⚠️ 4 aur 5 abhi live DB par **nahi** lage hain — Claude ko permission dein ya SQL Editor mein khud chalayein.
-      Jab tak nahi lagte: Partner app purane RPC par chalta hai (voice note nahi dikhega) aur customer ka voice
-      note upload "could not be sent" dikhayega — booking phir bhi ho jaayegi.
+      ✅ **21 Nov 2026 ko 4 aur 5 dono live project par lag chuke hain** (Claude ne Supabase connector se lagaye) —
+      dobara chalane ki zaroorat nahi (chalaoge to bhi safe hai).
 3. **Database → Extensions** → `pg_cron` enable, phir pehli file ka "AUTO-EXPIRE" wala `DO $$ … $$;` block dobara run.
 4. **Project Settings → API** se `Project URL` aur `anon / publishable key` → `env/prod.json` (dono repos mein).
 
@@ -73,7 +72,7 @@ supabase secrets set RAZORPAY_KEY_ID=rzp_live_xxx RAZORPAY_KEY_SECRET=xxx RAZORP
 supabase functions deploy razorpay-create-order
 supabase functions deploy razorpay-verify-payment
 supabase functions deploy razorpay-webhook --no-verify-jwt
-supabase functions deploy delete-account     # 20 Nov: voice notes bhi delete karta hai — dobara deploy karein
+supabase functions deploy delete-account     # ✅ 21 Nov: v2 deploy ho chuka hai (voice notes bhi delete karta hai)
 ```
 
 3. Razorpay → **Settings → Webhooks → Add**:
@@ -160,8 +159,6 @@ GitHub Actions har push par dono apps ka **test APK** banata hai (file: `.github
 | Customer | https://github.com/durgadas-karmakar07/8SpeedyService/releases/download/test-build/8SpeedyService-test.apk |
 | Partner | https://github.com/durgadas-karmakar07/8SpeedyService.Partner/releases/download/test-build/8Speedy-Partner-test.apk |
 
-> Jab tak branch `claude/call-alerts-voice-notes` main mein merge nahi hoti, naya build `test-build` ki jagah
-> `preview-build` release par hai — link mein `test-build` ko `preview-build` se badal dein.
 - Pehli baar phone poochega "Install unknown apps" — browser/WhatsApp ko allow karein.
 - Test APK ek CI test key se sign hota hai, isliye naya build purane ke upar install ho jaata hai.
   (Agar 7 din tak koi build na ho to key badal sakti hai — tab purana app uninstall karke naya daalein.)
@@ -214,7 +211,7 @@ GitHub Actions har push par dono apps ka **test APK** banata hai (file: `.github
 | 4 | Mechanic ka customer ka Start OTP padhna | ✅ Blocked — kisi mechanic RPC/realtime mein OTP nahi |
 | 5 | Fake payment (signature / amount / doosri booking ka payment) | ✅ Blocked — HMAC + Razorpay API + amount + order check |
 | 6 | Doosre ka account delete / unverified mechanic se job lena | ✅ Blocked |
-| 7 | **PostGIS `spatial_ref_sys` table ko public key se wipe karna (poora app band)** | ❌ **Possible tha** → fix: write-guard trigger (migration 005) |
+| 7 | **PostGIS `spatial_ref_sys` table ko public key se wipe karna (poora app band)** | ❌ **Possible tha** → ✅ fixed & live (21 Nov): ab anon DELETE block hota hai (test kiya) |
 | 8 | OTP guess: 4 galat try → job release → doosra mechanic same OTP par 5 aur try | ⚠️ Kamzori → fix: release par naya OTP |
 | 9 | Mechanic ka fake / galat GPS location bhejna | ⚠️ Kamzori → fix: India ke bahar / adhure coordinates reject |
 | 10 | APK kholkar secret keys dhoondhna | ✅ Koi secret nahi (CI har build scan karta hai); code obfuscated; not debuggable; backup off; http block; 16 KB aligned; targetSdk 36 |
