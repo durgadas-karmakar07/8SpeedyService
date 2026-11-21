@@ -51,7 +51,7 @@ flutter build appbundle --release --obfuscate --split-debug-info=build/symbols -
 ## Backend — Supabase
 - Project **8SpeedyService**, ref `mzxcbhiemdkhalslxwid`, region Mumbai (ap-south-1), Postgres 17,
   PostGIS 3.3 (installed in `public`, owned by `supabase_admin`).
-- Migrations in `supabase/migrations/` — **all 10 are live** (000001–000003 on 18 Nov, 000004–000010 on 21 Nov):
+- Migrations in `supabase/migrations/` — **all 11 are live** (000001–000003 on 18 Nov, 000004–000011 on 21 Nov):
   1. `..000001_init` — schema, RLS, booking/payment RPCs, pg_cron `expire-stale-bookings` (every 5 min)
   2. `..000002_mechanic_partner_app` — partner RPCs (register, link account, accept, release, start, complete…)
   3. `..000003_vehicles_and_account_deletion` — My Vehicles, `*_v2` RPCs, `delete_account_data`
@@ -76,6 +76,7 @@ flutter build appbundle --release --obfuscate --split-debug-info=build/symbols -
   9. `..000009_partner_history_v3` — `mechanic_get_job_history_v3` (repair bill, review tags).
   10. `..000010_ai_feedback_retention` — `ai_submit_feedback` (Helpful / Report, Google Play AI policy), retention:
      chat + AI requests 180 days (batched in `private.maintenance()`), partial indexes for the cron.
+  11. `..000011_fk_indexes` — covering indexes for `booking_messages.mechanic_id` and `ai_requests.booking_id`.
   Leftover: `private.sql_staging` (empty) was a temporary loader used to apply 000006 via pg_net — safe to drop.
 - Tables: `customers`, `mechanics`, `bookings`, `customer_vehicles`, `app_config` (single row id=1:
   fees per vehicle type, free credits, `min_android_version`, `min_partner_version`, `ai_enabled`,

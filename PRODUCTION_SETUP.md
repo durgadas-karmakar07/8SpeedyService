@@ -10,7 +10,7 @@ Order mein follow karein.
 
 | Area | Status |
 |---|---|
-| **Database** | `supabase/migrations/` — 10 migrations (schema, RLS, RPCs, mechanic app, vehicles, account deletion, voice notes, 2 security audits, chat, AI, payments) — **sab live** |
+| **Database** | `supabase/migrations/` — 11 migrations (schema, RLS, RPCs, mechanic app, vehicles, account deletion, voice notes, 2 security audits, chat, AI, payments) — **sab live** |
 | **Security (RLS)** | Har user sirf apna data dekhta hai; saare writes server functions se; mechanic ko start OTP kabhi nahi milta |
 | **Payment** | Server Razorpay order banata hai (price DB se), signature + Razorpay API se verify, webhook backup |
 | **Free credits / referral** | Signup par 5 credits, double-tap safe, cancel par credit wapas; friend ki pehli job par referrer ko +1 |
@@ -57,7 +57,8 @@ Order mein follow karein.
       voice-note cleanup), one-time nonce se authenticated (koi secret share nahi karna padta)
    9. `supabase/migrations/20261121000009_partner_history_v3.sql` — Partner history mein bill + review tags
    10. `supabase/migrations/20261121000010_ai_feedback_retention.sql` — AI answer Helpful / Report, chat + AI 180-din retention
-      ✅ **6–10 sab 21 Nov 2026 ko live lag chuke hain** (Claude ne connector se lagaye aur attack karke verify kiya).
+   11. `supabase/migrations/20261121000011_fk_indexes.sql` — 2 indexes (performance advisor)
+      ✅ **6–11 sab 21 Nov 2026 ko live lag chuke hain** (Claude ne connector se lagaye aur attack karke verify kiya).
 3. **Database → Extensions** → `pg_cron` enable, phir pehli file ka "AUTO-EXPIRE" wala `DO $$ … $$;` block dobara run.
 4. **Project Settings → API** se `Project URL` aur `anon / publishable key` → `env/prod.json` (dono repos mein).
 
