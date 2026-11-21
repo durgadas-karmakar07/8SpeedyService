@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Privacy Policy — 8SpeedyService</title><link rel="stylesheet" href="style.css"><link rel="icon" href="logo.png"></head><body>
-<header><div class="w"><img src="logo.png" alt=""><a href="index.html">8SpeedyService</a></div></header><main><div class="card"><h1>Privacy Policy</h1><p class="muted">Last updated: 18 November 2026</p>
+<header><div class="w"><img src="logo.png" alt=""><a href="index.html">8SpeedyService</a></div></header><main><div class="card"><h1>Privacy Policy</h1><p class="muted">Last updated: 21 November 2026</p>
 <p>This policy explains how 8SpeedyService ("we", "us") collects and uses personal data in the <b>8SpeedyService</b> customer app and the <b>8Speedy Partner</b> mechanic app (together, the "Apps"). We follow the Information Technology Act, 2000 and the Digital Personal Data Protection Act, 2023 of India.</p>
 <h2>1. Data we collect</h2>
 <table><tr><th>Data</th><th>Who</th><th>Why</th></tr>
@@ -12,18 +12,23 @@
 <tr><td>Booking details (issue, address, status, rating, review)</td><td>Both</td><td>Provide the service, history, quality</td></tr>
 <tr><td>Voice note (optional audio recording, max 60 seconds)</td><td>Customers, only if you tap the microphone</td><td>Explain the vehicle problem in your own words. Stored privately; only the mechanics who can see your request (and the mechanic who accepts it) can play it. The microphone is used only while you are recording.</td></tr>
 <tr><td>Payment status & Razorpay order/payment IDs</td><td>Customers</td><td>Confirm platform-fee payment. Card/UPI/bank details are handled by Razorpay; we never see or store them.</td></tr>
-<tr><td>Partner profile (shop name, vehicle types repaired, verification status)</td><td>Partners</td><td>Verification and job matching</td></tr></table>
+<tr><td>Partner profile (shop name, vehicle types repaired, verification status)</td><td>Partners</td><td>Verification and job matching</td></tr>
+<tr><td>AI diagnosis questions and answers (optional)</td><td>Customers & partners, only when you use "8Speedy Assist" / the AI repair guide</td><td>Suggest likely causes, a typical price range and safety tips (customers) or a repair checklist (partners). We send the problem you describe, the issue chips and the vehicle type/model — never your phone number or exact location — to our AI provider Anthropic (Claude API), which processes it on our behalf to create the answer. The question and answer are saved with your account; if you book, the mechanics who can see your request see a short summary of it. AI answers can be wrong and are not an inspection. You can rate or report any AI answer in the app; our team reviews reports.</td></tr>
+<tr><td>Chat messages</td><td>Customer and the assigned mechanic</td><td>Coordinate the job without sharing phone numbers. Only the two of you can read them. Links and payment IDs are blocked to protect you from fraud.</td></tr>
+<tr><td>Saved places (optional)</td><td>Customers</td><td>Labels such as Home or Work with the address and map point you choose to save.</td></tr>
+<tr><td>Repair bill (amount and short note)</td><td>Entered by the partner, shown to the customer</td><td>Digital bill for the customer and earnings history for the partner. Repair charges are paid directly to the partner.</td></tr>
+<tr><td>Security logs (e.g. repeated cancellations, wrong OTPs, rate-limit hits)</td><td>Both</td><td>Prevent fraud and abuse. Kept for up to 180 days.</td></tr></table>
 <p>We do not use advertising IDs, do not sell personal data and do not use your data for ads.</p>
 <h2>2. Who we share data with</h2>
-<ul><li><b>Customer ↔ assigned mechanic:</b> during an active job the mechanic sees your name, phone, pickup address and vehicle; you see the mechanic's first name, phone and live location. Before accepting, mechanics see only the area, vehicle model, issue and your optional voice note.</li>
-<li><b>Service providers:</b> Supabase (database & login, servers in Mumbai, India), the SMS provider used to send OTPs, Razorpay (payments), OpenStreetMap tile servers (map images; your IP address is visible to them).</li>
+<ul><li><b>Customer ↔ assigned mechanic:</b> during an active job the mechanic sees your name, phone, pickup address and vehicle; you see the mechanic's first name, phone and live location. Before accepting, mechanics see only the area, vehicle model, issue, the short AI summary (if you used AI help) and your optional voice note.</li>
+<li><b>Service providers:</b> Supabase (database & login, servers in Mumbai, India), the SMS provider used to send OTPs, Razorpay (payments and automatic refunds), Anthropic (AI answers, only when you use the AI features), OpenStreetMap tile servers (map images; your IP address is visible to them).</li>
 <li><b>Legal:</b> when required by Indian law or a valid government request.</li></ul>
 <h2>3. Retention</h2>
-<p>Account data is kept while your account is active. When you delete your account, your name, phone, saved vehicles, voice notes, partner profile and location are deleted or anonymised immediately. Booking and payment records are kept without your identity for up to 8 years for tax and accounting obligations.</p>
+<p>Account data is kept while your account is active. Voice notes are deleted automatically 30 days after the booking ends; chat messages, AI questions and answers, and security logs are deleted automatically after 180 days. When you delete your account, your name, phone, saved vehicles, saved places, voice notes, chat messages, AI questions, partner profile and exact pickup locations are deleted or anonymised immediately. Booking and payment records are kept without your identity for up to 8 years for tax and accounting obligations.</p>
 <h2>4. Your rights & deleting your account</h2>
 <p>You can view and edit your name in the app, and permanently delete your account any time: <b>Menu → Account & Privacy → Delete my account</b> (both apps). You can also request deletion without the app — see <a href="delete-account.html">Delete your account</a>. You may contact us to access, correct or erase your data, or withdraw consent.</p>
 <h2>5. Security</h2>
-<p>Data is encrypted in transit (HTTPS). Access is restricted per user by database security rules; payment verification happens only on our servers; the start OTP is never shown to mechanics.</p>
+<p>Data is encrypted in transit (HTTPS). Access is restricted per user by database security rules; only our own server functions can be called through the API; sensitive actions are rate limited; payment verification happens only on our servers; the start OTP is never shown to mechanics; mechanics' positions shown to customers before a booking are blurred.</p>
 <h2>6. Children</h2><p>The Apps are not meant for people under 18. We do not knowingly collect data from children.</p>
 <h2>7. Changes</h2><p>We will update this page and the "Last updated" date when this policy changes.</p>
 <h2>8. Contact & Grievance Officer</h2>
