@@ -15,11 +15,23 @@ void main() {
         'urgency': 'medium',
         'safe_to_ride': false,
         'likely_causes': <Map<String, dynamic>>[
-          <String, dynamic>{'title': 'Weak battery', 'probability': 140, 'explanation': 'Clicks only.'},
-          <String, dynamic>{'title': '', 'probability': 10, 'explanation': 'dropped'},
+          <String, dynamic>{
+            'title': 'Weak battery',
+            'probability': 140,
+            'explanation': 'Clicks only.',
+          },
+          <String, dynamic>{
+            'title': '',
+            'probability': 10,
+            'explanation': 'dropped',
+          },
         ],
         'suggested_issue_tags': <String>["Won't Start", 'Battery Dead'],
-        'estimated_cost': <String, dynamic>{'min_inr': 100, 'max_inr': 2150, 'note': 'Mechanic confirms.'},
+        'estimated_cost': <String, dynamic>{
+          'min_inr': 100,
+          'max_inr': 2150,
+          'note': 'Mechanic confirms.',
+        },
         'do_now': <String>['Switch off lights'],
         'avoid': <String>['Long cranking'],
         'questions_for_mechanic': <String>['Battery or starter?'],
@@ -41,7 +53,10 @@ void main() {
     final d = AssistDiagnosis.fromResponse(<String, dynamic>{
       'id': 'x',
       'engine': 'expert',
-      'result': <String, dynamic>{'summary': 'Call 112', 'urgency': 'emergency'},
+      'result': <String, dynamic>{
+        'summary': 'Call 112',
+        'urgency': 'emergency',
+      },
     });
     expect(d.isAi, isFalse);
     expect(d.isEmergency, isTrue);
@@ -53,21 +68,42 @@ void main() {
       'open': true,
       'role': 'customer',
       'messages': <Map<String, dynamic>>[
-        <String, dynamic>{'id': 'm1', 'sender_role': 'mechanic', 'body': 'On my way', 'created_at': '2026-11-21T03:00:00Z'},
+        <String, dynamic>{
+          'id': 'm1',
+          'sender_role': 'mechanic',
+          'body': 'On my way',
+          'created_at': '2026-11-21T03:00:00Z',
+        },
       ],
     });
     expect(t.open, isTrue);
     expect(t.messages.single.senderRole, 'mechanic');
 
-    final p = SavedPlace.fromJson(<String, dynamic>{'id': 'p', 'label': 'Home', 'address': 'Benachity', 'lat': 23.5, 'lng': 87.3});
+    final p = SavedPlace.fromJson(<String, dynamic>{
+      'id': 'p',
+      'label': 'Home',
+      'address': 'Benachity',
+      'lat': 23.5,
+      'lng': 87.3,
+    });
     expect(p.label, 'Home');
     expect(p.lat, 23.5);
 
-    final c = MechanicCard.fromJson(<String, dynamic>{'name': 'Ravi', 'rating': 4.7, 'jobs_completed': 12, 'top_tags': <String>['On time']});
+    final c = MechanicCard.fromJson(<String, dynamic>{
+      'name': 'Ravi',
+      'rating': 4.7,
+      'jobs_completed': 12,
+      'top_tags': <String>['On time'],
+    });
     expect(c.jobsCompleted, 12);
     expect(c.topTags, <String>['On time']);
 
-    final o = IssueOption.fromJson(<String, dynamic>{'code': 'fuel', 'label': 'Fuel Problem', 'icon': 'local_gas_station', 'categories': <String>['two_wheeler']});
+    final o = IssueOption.fromJson(<String, dynamic>{
+      'code': 'fuel',
+      'label': 'Fuel Problem',
+      'icon': 'local_gas_station',
+      'categories': <String>['two_wheeler'],
+    });
     expect(o.fits('two_wheeler'), isTrue);
     expect(o.fits('cycle_toto'), isFalse);
   });
@@ -95,9 +131,15 @@ void main() {
   });
 
   test('server message and Indian rupee formatting', () {
-    final cfg = AppConfigModel.fromJson(<String, dynamic>{'service_message': '  Heavy rain: expect delays  '});
+    final cfg = AppConfigModel.fromJson(<String, dynamic>{
+      'service_message': '  Heavy rain: expect delays  ',
+    });
     expect(cfg.serviceMessage, 'Heavy rain: expect delays');
-    expect(AppConfigModel.fromJson(<String, dynamic>{'service_message': ' '}).serviceMessage, isNull);
+    expect(
+      AppConfigModel.fromJson(<String, dynamic>{'service_message': ' '})
+          .serviceMessage,
+      isNull,
+    );
     expect(formatInr(950), '₹950');
     expect(formatInr(2150), '₹2,150');
     expect(formatInr(125000), '₹1,25,000');
@@ -106,6 +148,9 @@ void main() {
   test('fallback issue chips match the server catalog labels', () {
     expect(AppConstants.issueTags, contains("Won't Start"));
     expect(AppConstants.issueTags, contains('Key Lost / Lockout'));
-    expect(AppConstants.issueTags.toSet(), hasLength(AppConstants.issueTags.length));
+    expect(
+      AppConstants.issueTags.toSet(),
+      hasLength(AppConstants.issueTags.length),
+    );
   });
 }

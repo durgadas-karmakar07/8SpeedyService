@@ -7,6 +7,7 @@ import '../../core/utils/error_helper.dart';
 import '../../models/assist_models.dart';
 import '../../models/customer_vehicle.dart';
 import '../../services/assist_service.dart';
+import '../../widgets/ai_feedback.dart';
 import '../../widgets/premium.dart';
 import '../../widgets/speedy_loader.dart';
 import '../../widgets/vehicle_widgets.dart';
@@ -610,6 +611,14 @@ class _AiAssistScreenState extends State<AiAssistScreen> {
               ),
             ],
           ),
+        ),
+      ],
+      if (r.requestId.isNotEmpty) ...<Widget>[
+        const SizedBox(height: 14),
+        AiFeedbackBar(
+          key: ValueKey<String>(r.requestId),
+          onSubmit: (feedback, note) =>
+              _service.sendAiFeedback(r.requestId, feedback, note: note),
         ),
       ],
       const SizedBox(height: 14),

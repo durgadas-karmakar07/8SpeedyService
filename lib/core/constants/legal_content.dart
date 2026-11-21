@@ -34,7 +34,7 @@ class LegalContent {
 
   static const LegalDoc privacy = LegalDoc(
     title: 'Privacy Policy',
-    updated: 'Last updated: 18 November 2026',
+    updated: 'Last updated: 21 November 2026',
     url: AppConstants.privacyPolicyUrl,
     sections: <LegalSection>[
       LegalSection(
@@ -50,18 +50,22 @@ class LegalContent {
             '• Booking details — issue, address, status, rating and review.\n'
             '• Voice note (optional) — a short recording describing the problem, only if you tap the microphone. Only mechanics who can see your request, and the one who accepts it, can play it.\n'
             '• Payment status — Razorpay order and payment IDs. Card, UPI and bank details are handled by Razorpay; we never see or store them.\n'
+            '• AI diagnosis (optional) — what you describe, the issue chips and your vehicle model, only when you use 8Speedy Assist. It is processed by our AI provider Anthropic to create the answer (never your phone number or exact location). If you book, the mechanics who can see your request see a short summary of it. You can rate or report any AI answer in the app; our team reviews reports.\n'
+            '• Chat with your mechanic — visible only to you and the assigned mechanic. Links and payment IDs are blocked.\n'
+            '• Saved places (optional) — e.g. Home or Work, with the address you choose.\n'
+            '• Repair bill — the amount and note your mechanic enters at the end of the job.\n'
             'Partners: name, phone, shop details, vehicle types repaired, and live location while Online or on a job (also in the background, with a visible notification).',
       ),
       LegalSection(
         'How we share data',
         '• With your assigned mechanic during an active job: name, phone, pickup address and vehicle. You see the mechanic\'s first name, phone and live location.\n'
-            '• With service providers: Supabase (database and login, servers in Mumbai), the SMS provider for OTPs, Razorpay (payments), and OpenStreetMap (map images).\n'
+            '• With service providers: Supabase (database and login, servers in Mumbai), the SMS provider for OTPs, Razorpay (payments and refunds), Anthropic (AI answers, only when you use AI features), and OpenStreetMap (map images).\n'
             '• When required by Indian law.\n'
             'We do not sell your data and we do not show ads.',
       ),
       LegalSection(
         'How long we keep data',
-        'Account data is kept while your account is active. When you delete your account, your name, phone number, saved vehicles, voice notes and location are deleted or anonymised immediately. Booking and payment records are kept without your identity for up to 8 years for tax and accounting.',
+        'Account data is kept while your account is active. Voice notes are deleted 30 days after the booking ends; chats, AI questions and security logs are deleted after 180 days. When you delete your account, your name, phone number, saved vehicles, saved places, voice notes, chats, AI questions, partner profile and exact locations are deleted or anonymised immediately. Booking and payment records are kept without your identity for up to 8 years for tax and accounting.',
       ),
       LegalSection(
         'Your rights',

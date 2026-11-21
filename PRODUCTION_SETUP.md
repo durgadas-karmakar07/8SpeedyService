@@ -10,7 +10,7 @@ Order mein follow karein.
 
 | Area | Status |
 |---|---|
-| **Database** | `supabase/migrations/` — 3 migrations: schema, RLS, RPCs, mechanic app, vehicles, account deletion (local Postgres par test kiye gaye) |
+| **Database** | `supabase/migrations/` — 10 migrations (schema, RLS, RPCs, mechanic app, vehicles, account deletion, voice notes, 2 security audits, chat, AI, payments) — **sab live** |
 | **Security (RLS)** | Har user sirf apna data dekhta hai; saare writes server functions se; mechanic ko start OTP kabhi nahi milta |
 | **Payment** | Server Razorpay order banata hai (price DB se), signature + Razorpay API se verify, webhook backup |
 | **Free credits / referral** | Signup par 5 credits, double-tap safe, cancel par credit wapas; friend ki pehli job par referrer ko +1 |
@@ -23,6 +23,15 @@ Order mein follow karein.
 | **Call-style job alerts** (20 Nov) | Partner app: naya request aate hi phone-call jaisa full screen + original "8Speedy" ringtone (lock screen par bhi) |
 | **Voice note** (20 Nov) | Customer apni awaaz mein problem bol sakta hai (60 sec); paas ke mechanics sun sakte hain — private bucket + RLS |
 | **Test APK (CI)** (20 Nov) | Har push par GitHub Actions: analyze + test + obfuscated APK + security scan + emulator run → `test-build` release |
+| **8Speedy Assist — AI** (21 Nov) | Customer problem apne shabdon mein likhe (English / Hindi / Bengali) → likely causes, urgency, "ride karein ya nahi", estimated repair cost, abhi kya karein. Claude API (Anthropic); key na ho ya fail ho to built-in expert system jawab deta hai. Har jawab ke neeche Helpful / Report |
+| **AI repair guide** (21 Nov, Partner) | Active job ke liye checklist, tools & parts, safety — EN / हिं / বাং |
+| **In-app chat** (21 Nov) | Customer ↔ assigned mechanic, quick replies; links / UPI IDs block (fraud se bachav) |
+| **Live tracking 2.0** (21 Nov) | Private realtime channels (sirf customer + uska mechanic sun sakte hain), ETA, mechanic card, **SOS** (112 / 108, trip share — OTP ke bina) |
+| **Bills, reviews, places** (21 Nov) | Mechanic job ke end mein repair bill daalta hai → customer ko digital bill; review tags; Home / Work saved places |
+| **Earnings dashboard** (21 Nov, Partner) | Aaj / hafta / 30 din kamai, 7-din chart, completion rate, rating |
+| **Payments 2.0** (21 Nov) | Koi payment "kho" nahi sakta (har order record), authorized payment auto-capture, cancel / double payment par **automatic refund** (har 10 min) |
+| **Security audit #2** (21 Nov) | 14 attack families — sab fix & live. Report: `SECURITY_AUDIT.md` |
+| **Scale (1M users)** (21 Nov) | Indexes, per-user rate limits, adaptive polling, realtime broadcast, cleanup jobs (voice notes 30 din, chat / AI 180 din) |
 
 ---
 
@@ -39,6 +48,16 @@ Order mein follow karein.
    5. `supabase/migrations/20261120000005_security_hardening.sql` — security audit fixes (20 Nov)
       ✅ **21 Nov 2026 ko 4 aur 5 dono live project par lag chuke hain** (Claude ne Supabase connector se lagaye) —
       dobara chalane ki zaroorat nahi (chalaoge to bhi safe hai).
+   6. `supabase/migrations/20261121000006_security_scale_features.sql` — audit #2 fixes, scale indexes, chat, saved places,
+      AI storage, refund-safe payments, private realtime topics, cleanup cron
+   7. `supabase/migrations/20261121000007_api_guard.sql` — API guard: REST API se sirf hamare banaye functions/tables
+      khulte hain (PostGIS helper functions 404). **Emergency off switch** (agar kabhi app ka koi call 404 de):
+      `ALTER ROLE authenticator RESET pgrst.db_pre_request; NOTIFY pgrst, 'reload config';`
+   8. `supabase/migrations/20261121000008_maintenance_cron.sql` — har 10 min `maintenance` Edge Function (auto refunds,
+      voice-note cleanup), one-time nonce se authenticated (koi secret share nahi karna padta)
+   9. `supabase/migrations/20261121000009_partner_history_v3.sql` — Partner history mein bill + review tags
+   10. `supabase/migrations/20261121000010_ai_feedback_retention.sql` — AI answer Helpful / Report, chat + AI 180-din retention
+      ✅ **6–10 sab 21 Nov 2026 ko live lag chuke hain** (Claude ne connector se lagaye aur attack karke verify kiya).
 3. **Database → Extensions** → `pg_cron` enable, phir pehli file ka "AUTO-EXPIRE" wala `DO $$ … $$;` block dobara run.
 4. **Project Settings → API** se `Project URL` aur `anon / publishable key` → `env/prod.json` (dono repos mein).
 
@@ -55,9 +74,14 @@ Testing / Play reviewer ke liye: **Test OTP** (jaise `919999999999=123456`).
 - *SMS OTPs sent per hour*: shuru mein **30** (SMS fraud se paisa bachata hai; zaroorat par badhayein)
 - *Token verifications*: default theek hai
 **Authentication → Providers → Phone**: OTP expiry **300 sec**, OTP length **6**.
-**Authentication → Sign In**: Email provider band kar dein (sirf phone use hota hai).
+**Authentication → Sign In / Providers → Email**: **band kar dein** (sirf phone use hota hai; e-mail se bane
+accounts ko waise bhi koi data nahi milta, par fake accounts kyun banne dein).
+**Authentication → Attack Protection**: **CAPTCHA** (hCaptcha / Turnstile) on karein — OTP flood se SMS ka paisa bachata hai.
+(CAPTCHA on karne par app mein captcha token bhejna padega — yeh agla kaam hai; tab tak SMS rate limit 30/h rakhein.)
+**Realtime → Settings → "Allow public access"**: jab sab users app **1.1.0+** par aa jaayein tab **off** karein
+(1.1.0 sirf private channels use karta hai; purane 1.0.x installs public channels use karte hain).
 
-## Step 2 — Edge Functions (Razorpay + account deletion)
+## Step 2 — Edge Functions (Razorpay, AI, refunds, account deletion)
 
 1. Razorpay dashboard → KYC → **Settings → API Keys** → Live keys. **Payment Capture → Automatic** ON.
 2. Supabase CLI (Windows: `scoop install supabase` ya `npx supabase`):
@@ -73,18 +97,41 @@ supabase functions deploy razorpay-create-order
 supabase functions deploy razorpay-verify-payment
 supabase functions deploy razorpay-webhook --no-verify-jwt
 supabase functions deploy delete-account     # ✅ 21 Nov: v2 deploy ho chuka hai (voice notes bhi delete karta hai)
+supabase functions deploy ai-assistant       # ✅ 21 Nov deploy ho chuka hai
+supabase functions deploy maintenance --no-verify-jwt   # ✅ 21 Nov deploy ho chuka hai (auto refunds + cleanup)
 ```
+
+**AI ko asli Claude se chalane ke liye (zaroori, warna "Expert guide" fallback chalta hai):**
+https://console.anthropic.com → API key banayein → Supabase → **Edge Functions → Secrets**:
+`ANTHROPIC_API_KEY = sk-ant-…` (optional: `AI_MODEL`, default `claude-opus-5-5`; `AI_EFFORT`, default `low`).
+Key sirf Supabase secrets mein — app ya git mein kabhi nahi. Kharcha control: `app_config.ai_daily_limit_customer` (15/din)
+aur `ai_daily_limit_mechanic` (40/din); poora AI band: `app_config.ai_enabled = false`.
+
+> 21 Nov ko Claude ne functions Supabase connector se deploy kiye: har function ek chhota "stub" hai jo is public repo ki
+> ek **fixed commit** (`d17f8f4`) ka code import karta hai. Aap jab bhi upar wale `supabase functions deploy` commands
+> chalayenge, apne PC ka code deploy ho jaayega (yahi behtar hai). ⚠️ **Repo private karne se pehle** functions ko
+> CLI se dobara deploy zaroor karein, warna stub GitHub se code nahi le paayega.
 
 3. Razorpay → **Settings → Webhooks → Add**:
    URL `https://YOUR-PROJECT-REF.supabase.co/functions/v1/razorpay-webhook`,
-   Secret = `RAZORPAY_WEBHOOK_SECRET`, Events: `payment.captured`, `order.paid`.
+   Secret = `RAZORPAY_WEBHOOK_SECRET`, Events: `payment.captured`, `order.paid`, **`refund.processed`, `refund.failed`**.
 
 > ⚠️ `RAZORPAY_KEY_SECRET` kabhi app ya git mein mat daalein.
 
-### Refunds
-Jab paid booking bina mechanic ke cancel hoti hai, `bookings.refund_status = 'REQUESTED'` ho jaata hai.
-Roz ek baar **Table Editor → bookings** filter `refund_status = REQUESTED` → Razorpay dashboard se
-us `razorpay_payment_id` ka refund karein → row mein `refund_status = 'REFUNDED'` likh dein.
+### Refunds (ab automatic)
+Jab paid booking bina mechanic ke cancel hoti hai (ya ek booking ke liye do baar payment ho jaaye), `maintenance`
+function har 10 minute mein Razorpay se **khud refund** karta hai: `refund_status` REQUESTED → PROCESSING → REFUNDED
+(fail ho to `FAILED` — tab Razorpay dashboard se manual refund karke `REFUNDED` likh dein).
+Band karna ho: `app_config.auto_refunds_enabled = false` (tab purana manual tareeka: Table Editor → bookings →
+`refund_status = REQUESTED` → Razorpay se refund → `REFUNDED`).
+
+### AI reports dekhna (Google Play policy)
+SQL Editor mein (hafte mein ek baar):
+```sql
+SELECT id, mode, feedback, feedback_note, output->>'summary' AS answer, feedback_at
+  FROM public.ai_requests WHERE feedback IN ('wrong', 'unsafe', 'offensive')
+ ORDER BY feedback_at DESC;
+```
 
 ## Step 3 — Mechanics (Partner app)
 
@@ -177,7 +224,9 @@ GitHub Actions har push par dono apps ka **test APK** banata hai (file: `.github
    - Customer: `store/PLAY_STORE_LISTING.md` (is repo mein)
    - Partner: `store/PLAY_STORE_LISTING.md` (Partner repo mein) — **Foreground service declaration** aur
      **Full-screen intent declaration** (call-style alerts; jawab "No, calling/alarm app nahi") zaroor bharein
-   - Customer Data safety mein naya: **Audio → Voice or sound recordings** (optional voice note)
+   - Customer Data safety mein naya: **Audio → Voice or sound recordings** (optional voice note),
+     **Messages → Other in-app messages** (chat), AI questions (user-generated content) — table listing file mein hai
+   - Partner Data safety mein naya: **Messages** (chat) aur **Financial info → Other** (repair bill / earnings)
 4. Testing → Closed testing → `.aab` upload → testers ke Gmail add karein.
 
 ## Step 8 — Launch se pehle test checklist
@@ -200,6 +249,31 @@ GitHub Actions har push par dono apps ka **test APK** banata hai (file: `.github
 - [ ] Android 14+: "Allow full-screen alerts" banner → setting on → lock screen par full screen dikhe
 - [ ] Customer: mic → 10 sec bolo → play karke suno → booking → Partner mein request par ▶ voice note bajey
 - [ ] Customer voice note ke saath delete account → Storage → voice-notes bucket mein uska folder khali
+- [ ] **AI (1.1.0):** Issue summary → card "Not sure what's wrong? Ask 8Speedy Assist" → Hindi mein likho "self start pe sirf click aata hai" →
+      causes + cost + "Do this now" aaye (ANTHROPIC key ho to label "AI", warna "Expert guide") → "Use these issues & book"
+- [ ] AI jawab ke neeche 👍 / Report → Report → "Unsafe advice" → SQL query mein row dikhe
+- [ ] Partner job screen → "AI repair guide — steps, tools & parts" → EN / हिं / বাং badal kar dekho
+- [ ] Chat: dono taraf message jaaye (5–6 sec mein), link / UPI ID bhejne par error aaye
+- [ ] Live tracking: ETA dikhe, SOS button → 112 / 108 / trip share (message mein OTP nahi hona chahiye)
+- [ ] Partner complete karte waqt bill (₹ + note) → customer ko "Repair bill" dikhe; My bookings mein bhi
+- [ ] Partner job screen ka 📞 button → customer ka number aaye (1.1.0 mein number job payload mein nahi aata, alag logged call se)
+- [ ] Customer 3 baar book → cancel (mechanic accept se pehle) → 4th booking par "30 min" cooldown message
+- [ ] Partner 3 baar job release (24 h) → 12 ghante ka pause banner
+- [ ] Partner 5 galat OTP → customer ko "New OTP" button → naya OTP se job start ho
+- [ ] Partner Earnings & Jobs: 7-din chart, completion rate
+
+## Security audit #2 — 21 Nov 2026 (14 attack families)
+Poori report: **`SECURITY_AUDIT.md`**. Short mein: 9 nayi kamzoriyan mili (PostGIS RPCs, phishing naam, "ring bombing",
+fake issue tags / UPI notes, payment kho jaana, phone number harvesting, mechanic ki exact location trilateration,
+location scraping, e-mail signup) — **sab fix & live**, attack dobara chala ke verify kiya.
+
+## Owner ke kaam (dashboard — Claude nahi kar sakta)
+1. Supabase → Edge Functions → Secrets: `ANTHROPIC_API_KEY` (asli AI ke liye)
+2. Supabase → Authentication: Email provider **off**, SMS rate limit 30/h, (baad mein) CAPTCHA
+3. Supabase → Realtime → Settings: "Allow public access" **off** — jab sab users 1.1.0+ par hon
+4. Razorpay → Webhooks: `refund.processed`, `refund.failed` events add karein; live keys + KYC
+5. Firebase project + `google-services.json` (push notifications ke liye — agla bada kaam)
+6. Play Console: Data safety naye rows ke saath (listing files mein ready)
 
 ## Security audit — 20 Nov 2026 (10 "hack" attempts)
 

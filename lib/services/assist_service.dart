@@ -48,6 +48,24 @@ class AssistService {
     }
   }
 
+  /// "Helpful / Not helpful / Report" for one of the user's own AI answers
+  /// (Google Play AI-generated content policy). `feedback` is one of
+  /// `helpful`, `not_helpful`, `wrong`, `unsafe`, `offensive`.
+  Future<void> sendAiFeedback(
+    String requestId,
+    String feedback, {
+    String? note,
+  }) async {
+    await _client.rpc<dynamic>(
+      'ai_submit_feedback',
+      params: <String, dynamic>{
+        'p_request_id': requestId,
+        'p_feedback': feedback,
+        'p_note': note,
+      },
+    );
+  }
+
   // ---------------------------------------------------------------------------
   // Chat
   // ---------------------------------------------------------------------------
