@@ -2,10 +2,18 @@
 // Body: { "booking_id": "<uuid>" }
 // Creates (or re-uses) a Razorpay Order for the booking's platform fee.
 // The AMOUNT IS READ FROM THE DATABASE — the app can never choose the price.
+//
+// Audit #2 fix: if the previous order of this booking was already PAID at
+// Razorpay (the app lost network before verifying and the webhook was late),
+// the payment is reconciled instead of creating a second order — the customer
+// is never charged twice and the first payment is never lost. Every order is
+// kept in `payment_orders`, so a late webhook for any order still finds the
+// booking.
 
 import {
   adminClient,
   corsHeaders,
+  ensureCaptured,
   env,
   getCallerId,
   json,
@@ -48,22 +56,42 @@ Deno.serve(async (req) => {
       return json({ error: "Invalid platform fee amount." }, 409);
     }
 
+    // Abuse guard: at most 15 checkout attempts per customer per hour.
+    const { count } = await db
+      .from("payment_orders")
+      .select("order_id", { count: "exact", head: true })
+      .eq("customer_id", userId)
+      .gte("created_at", new Date(Date.now() - 3600_000).toISOString());
+    if ((count ?? 0) >= 15) {
+      return json({ error: "Too many payment attempts. Please try again later." }, 429);
+    }
+
     const keyId = env("RAZORPAY_KEY_ID");
 
-    // Re-use an existing order if it is still payable (user retried checkout).
     if (booking.razorpay_order_id) {
       try {
         const existing = await razorpayRequest(`/orders/${booking.razorpay_order_id}`);
-        if (existing.status !== "paid" && Number(existing.amount) === amountPaise) {
-          return json({
-            order_id: booking.razorpay_order_id,
-            amount: amountPaise,
-            currency: "INR",
-            key_id: keyId,
-          });
+        if (existing.status === "paid") {
+          // Money already received for the previous order -> reconcile.
+          const list = await razorpayRequest(`/orders/${booking.razorpay_order_id}/payments`);
+          const items = (list.items as Record<string, unknown>[] | undefined) ?? [];
+          const paid = items.find((p) =>
+            (p.status === "captured" || p.status === "authorized") && Number(p.amount) === amountPaise
+          );
+          if (paid && await ensureCaptured(paid)) {
+            const { error: rpcErr } = await db.rpc("mark_booking_paid", {
+              p_booking_id: booking.id,
+              p_order_id: booking.razorpay_order_id,
+              p_payment_id: String(paid.id),
+            });
+            if (rpcErr) throw rpcErr;
+            return json({ error: "This booking is already paid.", already_paid: true }, 409);
+          }
+        } else if (Number(existing.amount) === amountPaise) {
+          return json({ order_id: booking.razorpay_order_id, amount: amountPaise, currency: "INR", key_id: keyId });
         }
-      } catch (_) {
-        // fall through and create a fresh order
+      } catch (e) {
+        console.warn("could not re-use previous order", booking.razorpay_order_id, String(e));
       }
     }
 
@@ -83,6 +111,13 @@ Deno.serve(async (req) => {
     });
 
     const orderId = String(order.id);
+    const { error: insErr } = await db.from("payment_orders").insert({
+      order_id: orderId,
+      booking_id: booking.id,
+      customer_id: userId,
+      amount_paise: amountPaise,
+    });
+    if (insErr) throw insErr;
     const { error: updErr } = await db
       .from("bookings")
       .update({ razorpay_order_id: orderId })

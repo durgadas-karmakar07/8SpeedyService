@@ -1,7 +1,10 @@
 # Supabase CLI config (only the parts this project needs).
 # Edge Function JWT settings:
-#   create-order / verify-payment -> called by the logged-in app (JWT required)
-#   webhook -> called by Razorpay servers (no JWT; protected by HMAC signature)
+#   create-order / verify-payment / ai-assistant / delete-account -> called by the
+#     logged-in app (JWT required)
+#   razorpay-webhook -> called by Razorpay servers (no JWT; protected by HMAC signature)
+#   maintenance      -> called by pg_cron through pg_net (no JWT; protected by a
+#     one-time nonce that only the database can create)
 
 [functions.razorpay-create-order]
 verify_jwt = true
@@ -14,3 +17,9 @@ verify_jwt = false
 
 [functions.delete-account]
 verify_jwt = true
+
+[functions.ai-assistant]
+verify_jwt = true
+
+[functions.maintenance]
+verify_jwt = false

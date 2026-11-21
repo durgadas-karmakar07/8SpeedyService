@@ -1,15 +1,20 @@
 // POST /functions/v1/razorpay-verify-payment
 // Body: { booking_id, razorpay_order_id, razorpay_payment_id, razorpay_signature }
 // Verifies the checkout signature with the SECRET key (server only), double-checks
-// the payment with Razorpay's API, then marks the booking PAID.
+// the payment with Razorpay's API (right order, right amount), captures an
+// `authorized` payment, then marks the booking PAID.
 
 import {
   adminClient,
   corsHeaders,
+  ensureCaptured,
   env,
+  findOrder,
   getCallerId,
   hmacSha256Hex,
   json,
+  ORDER_RE,
+  PAYMENT_RE,
   razorpayRequest,
   safeEqual,
   UUID_RE,
@@ -29,40 +34,46 @@ Deno.serve(async (req) => {
     const paymentId = String(body.razorpay_payment_id ?? "");
     const signature = String(body.razorpay_signature ?? "");
 
-    if (!UUID_RE.test(bookingId) || !orderId || !paymentId || !signature) {
+    if (!UUID_RE.test(bookingId) || !ORDER_RE.test(orderId) || !PAYMENT_RE.test(paymentId) ||
+        !/^[a-f0-9]{64}$/.test(signature)) {
       return json({ error: "Incomplete payment details." }, 400);
     }
 
     const db = adminClient();
     const { data: booking, error } = await db
       .from("bookings")
-      .select("id, customer_id, payment_status, platform_fee, razorpay_order_id")
+      .select("id, customer_id, payment_status, razorpay_payment_id")
       .eq("id", bookingId)
       .maybeSingle();
     if (error) throw error;
     if (!booking || booking.customer_id !== userId) {
       return json({ error: "Booking not found." }, 404);
     }
-    if (booking.payment_status === "PAID") {
+    if (booking.payment_status === "PAID" && booking.razorpay_payment_id === paymentId) {
       return json({ verified: true, payment_status: "PAID" });
     }
-    if (booking.razorpay_order_id !== orderId) {
+
+    // Any order this booking ever had is acceptable (customer may have retried).
+    const order = await findOrder(db, orderId);
+    if (!order || order.booking_id !== bookingId) {
       return json({ error: "Payment does not match this booking." }, 400);
     }
 
-    // 1) Signature check: HMAC_SHA256(order_id + "|" + payment_id, key_secret)
+    // 1) Signature: HMAC_SHA256(order_id + "|" + payment_id, key_secret)
     const expected = await hmacSha256Hex(env("RAZORPAY_KEY_SECRET"), `${orderId}|${paymentId}`);
     if (!safeEqual(expected, signature)) {
       console.warn("Invalid Razorpay signature for booking", bookingId);
       return json({ error: "Payment verification failed." }, 400);
     }
 
-    // 2) Ask Razorpay directly: right order, right amount, money actually received.
+    // 2) Ask Razorpay directly: right order, right amount, money received.
     const payment = await razorpayRequest(`/payments/${paymentId}`);
-    const amountOk = Number(payment.amount) === Number(booking.platform_fee) * 100;
-    const statusOk = payment.status === "captured" || payment.status === "authorized";
-    if (payment.order_id !== orderId || !amountOk || !statusOk) {
-      console.warn("Razorpay payment mismatch", { bookingId, payment });
+    const amountOk = Number(payment.amount) === Number(order.amount_paise);
+    if (payment.order_id !== orderId || !amountOk) {
+      console.warn("Razorpay payment mismatch", { bookingId, orderId, status: payment.status });
+      return json({ error: "Payment not confirmed by Razorpay yet. Please retry." }, 400);
+    }
+    if (!(await ensureCaptured(payment))) {
       return json({ error: "Payment not confirmed by Razorpay yet. Please retry." }, 400);
     }
 

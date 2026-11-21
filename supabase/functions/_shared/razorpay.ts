@@ -1,10 +1,10 @@
-// Shared helpers for the Razorpay Edge Functions.
+// Shared helpers for the Razorpay / maintenance Edge Functions.
 // Secrets are read from Supabase Edge Function secrets (never shipped in the app):
-//   RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET
+//   RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET, CRON_SECRET
 // SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are injected
 // automatically by Supabase.
 
-import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2";
+import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2.119.0";
 
 export const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -50,6 +50,12 @@ function razorpayAuthHeader(): string {
   return "Basic " + btoa(`${env("RAZORPAY_KEY_ID")}:${env("RAZORPAY_KEY_SECRET")}`);
 }
 
+export class RazorpayError extends Error {
+  constructor(readonly status: number, readonly description: string) {
+    super(`Razorpay API error (${status}): ${description}`);
+  }
+}
+
 export async function razorpayRequest(
   path: string,
   init: { method?: string; body?: unknown } = {},
@@ -61,11 +67,12 @@ export async function razorpayRequest(
       "Content-Type": "application/json",
     },
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
+    signal: AbortSignal.timeout(15_000),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     const desc = (data as { error?: { description?: string } })?.error?.description;
-    throw new Error(`Razorpay API error (${res.status}): ${desc ?? "unknown"}`);
+    throw new RazorpayError(res.status, desc ?? "unknown");
   }
   return data as Record<string, unknown>;
 }
@@ -94,3 +101,50 @@ export function safeEqual(a: string, b: string): boolean {
 
 export const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export const ORDER_RE = /^order_[A-Za-z0-9]{6,40}$/;
+export const PAYMENT_RE = /^pay_[A-Za-z0-9]{6,40}$/;
+
+export interface KnownOrder {
+  order_id: string;
+  booking_id: string;
+  amount_paise: number;
+}
+
+/**
+ * Finds the booking an order belongs to. Every order we ever created is kept in
+ * `payment_orders`, so a payment for an older order (customer retried checkout)
+ * is never lost.
+ */
+export async function findOrder(db: SupabaseClient, orderId: string): Promise<KnownOrder | null> {
+  const { data } = await db
+    .from("payment_orders")
+    .select("order_id, booking_id, amount_paise")
+    .eq("order_id", orderId)
+    .maybeSingle();
+  if (data) return data as KnownOrder;
+  const { data: booking } = await db
+    .from("bookings")
+    .select("id, platform_fee")
+    .eq("razorpay_order_id", orderId)
+    .maybeSingle();
+  if (!booking) return null;
+  return { order_id: orderId, booking_id: booking.id, amount_paise: Number(booking.platform_fee) * 100 };
+}
+
+/** Captures an `authorized` payment so it is not auto-refunded by Razorpay. */
+export async function ensureCaptured(payment: Record<string, unknown>): Promise<boolean> {
+  if (payment.status === "captured") return true;
+  if (payment.status !== "authorized") return false;
+  try {
+    const captured = await razorpayRequest(`/payments/${payment.id}/capture`, {
+      method: "POST",
+      body: { amount: payment.amount, currency: payment.currency ?? "INR" },
+    });
+    return captured.status === "captured";
+  } catch (e) {
+    // Already captured by Razorpay's automatic capture in the meantime.
+    if (e instanceof RazorpayError && /already been captured/i.test(e.description)) return true;
+    throw e;
+  }
+}
