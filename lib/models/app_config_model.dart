@@ -9,6 +9,7 @@ class AppConfigModel {
     required this.minVisitCharge,
     required this.minAndroidVersion,
     required this.feesByVehicle,
+    this.serviceMessage,
   });
 
   /// Creates default configuration matching the database schema defaults.
@@ -62,6 +63,10 @@ class AppConfigModel {
       minAndroidVersion:
           json['min_android_version'] as String? ?? defaults.minAndroidVersion,
       feesByVehicle: parsedFees,
+      serviceMessage:
+          (json['service_message'] as String?)?.trim().isEmpty ?? true
+          ? null
+          : (json['service_message'] as String).trim(),
     );
   }
 
@@ -71,6 +76,9 @@ class AppConfigModel {
   final int minVisitCharge;
   final String minAndroidVersion;
   final Map<String, int> feesByVehicle;
+
+  /// Optional announcement shown on the home screen (e.g. heavy rain delays).
+  final String? serviceMessage;
 
   /// Returns the platform fee in INR for the given [vehicleType].
   int feeForVehicle(String vehicleType) {

@@ -62,13 +62,19 @@ class SpeedyServiceApp extends StatelessWidget {
         snackBarTheme: SnackBarThemeData(
           behavior: SnackBarBehavior.floating,
           backgroundColor: AppConstants.secondaryDarkColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
         chipTheme: ChipThemeData(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
         dialogTheme: DialogThemeData(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
         ),
         bottomSheetTheme: const BottomSheetThemeData(
           backgroundColor: Colors.white,
@@ -78,11 +84,85 @@ class SpeedyServiceApp extends StatelessWidget {
           style: FilledButton.styleFrom(
             backgroundColor: AppConstants.primaryColor,
             foregroundColor: Colors.white,
+            minimumSize: const Size(64, 48),
+            textStyle: const TextStyle(
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w700,
+            ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
             ),
           ),
         ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(64, 48),
+            foregroundColor: AppConstants.secondaryDarkColor,
+            side: const BorderSide(color: Color(0xFFCBD5E1)),
+            textStyle: const TextStyle(
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w700,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: AppConstants.primaryDarkColor,
+            textStyle: const TextStyle(
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(
+              color: AppConstants.primaryColor,
+              width: 1.6,
+            ),
+          ),
+        ),
+        listTileTheme: const ListTileThemeData(
+          iconColor: AppConstants.secondaryDarkColor,
+          titleTextStyle: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: AppConstants.secondaryDarkColor,
+          ),
+        ),
+        drawerTheme: const DrawerThemeData(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+        ),
+        progressIndicatorTheme: const ProgressIndicatorThemeData(
+          color: AppConstants.primaryColor,
+        ),
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: <TargetPlatform, PageTransitionsBuilder>{
+            TargetPlatform.android: ZoomPageTransitionsBuilder(),
+          },
+        ),
+        splashFactory: InkSparkle.splashFactory,
+        visualDensity: VisualDensity.standard,
       ),
       home: const SplashScreen(),
     );

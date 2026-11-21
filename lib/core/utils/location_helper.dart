@@ -1,3 +1,5 @@
+import 'dart:ui' show Locale;
+
 import 'package:flutter/foundation.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -30,6 +32,9 @@ class LocationResult {
 class LocationHelper {
   LocationHelper._();
 
+  /// Native reverse geocoder (created on first use; geocoding 5.x API).
+  static Geocoding? _geocoder;
+
   /// Checks location services and runtime permissions, then returns the
   /// device coordinates and reverse-geocoded address.
   ///
@@ -51,8 +56,7 @@ class LocationHelper {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
           return await _fallbackResult(
-            errorMessage:
-                'Location permission denied. Drag the map pin to choose pickup.',
+            errorMessage: 'Location permission denied. Drag the map pin to choose pickup.',
           );
         }
       }
@@ -107,7 +111,8 @@ class LocationHelper {
   /// Reverse-geocodes [lat] and [lng] into a readable street address.
   static Future<String> getAddressFromLatLng(double lat, double lng) async {
     try {
-      final placemarks = await placemarkFromCoordinates(lat, lng);
+      _geocoder ??= Geocoding(locale: const Locale('en', 'IN'));
+      final placemarks = await _geocoder!.placemarkFromCoordinates(lat, lng);
       if (placemarks.isEmpty) {
         return _formatCoordinates(lat, lng);
       }

@@ -66,8 +66,7 @@ class _SplashScreenState extends State<SplashScreen> {
         if (!mounted) return;
         _navigateTo(
           const PhoneLoginScreen(
-            blockedNotice:
-                'Your account has been restricted. Please contact 8SpeedyService support.',
+            blockedNotice: 'Your account has been restricted. Please contact 8SpeedyService support.',
           ),
         );
         return;
@@ -95,8 +94,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (!mounted) return;
       setState(() {
         _isChecking = false;
-        _errorMessage =
-            'Unable to connect to 8SpeedyService servers. Please check your internet connection.';
+        _errorMessage = 'Unable to connect to 8SpeedyService servers. Please check your internet connection.';
       });
     }
   }
@@ -105,9 +103,9 @@ class _SplashScreenState extends State<SplashScreen> {
   /// config cannot be loaded (weak network).
   Future<bool> _isUpdateRequired() async {
     try {
-      final config = await _bookingService
-          .fetchAppConfig()
-          .timeout(const Duration(seconds: 6));
+      final config = await _bookingService.fetchAppConfig().timeout(
+        const Duration(seconds: 6),
+      );
       return AppConstants.isVersionOlder(
         AppConstants.appVersion,
         config.minAndroidVersion,
@@ -148,9 +146,8 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _navigateTo(Widget screen) {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (_) => screen),
-    );
+    Navigator.of(context)
+        .pushReplacement(MaterialPageRoute<void>(builder: (_) => screen));
   }
 
   @override
@@ -285,7 +282,8 @@ class _SplashScreenState extends State<SplashScreen> {
                                 onPressed: _bootstrapApp,
                                 style: FilledButton.styleFrom(
                                   backgroundColor: Colors.white,
-                                  foregroundColor: AppConstants.primaryDarkColor,
+                                  foregroundColor:
+                                      AppConstants.primaryDarkColor,
                                 ),
                                 child: const Text('Retry'),
                               ),

@@ -119,7 +119,9 @@ class _ReferEarnScreenState extends State<ReferEarnScreen> {
       if (!launched && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('WhatsApp could not be opened. Referral code copied!'),
+            content: Text(
+              'WhatsApp could not be opened. Referral code copied!',
+            ),
           ),
         );
         await _copyCode();

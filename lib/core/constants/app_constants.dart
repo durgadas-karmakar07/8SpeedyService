@@ -45,7 +45,7 @@ class AppConstants {
 
   /// Must match `version:` in pubspec.yaml (without the +build part).
   /// Compared against `app_config.min_android_version` for force updates.
-  static const String appVersion = '1.0.0';
+  static const String appVersion = '1.1.0';
   static const String playStoreUrl =
       'https://play.google.com/store/apps/details?id=com.speedyservice.customer';
 
@@ -66,6 +66,7 @@ class AppConstants {
     }
     return false;
   }
+
   static const String cityName = 'Durgapur';
   static const Color primaryColor = Color(0xFFFF5722);
   static const Color primaryDarkColor = Color(0xFFE64A19);
@@ -182,13 +183,69 @@ class AppConstants {
     ),
   ];
 
+  /// Fallback issue chips (the live list comes from `issue_catalog`).
+  /// Labels must match the server catalog exactly.
   static const List<String> issueTags = <String>[
     'Puncture / Tyre Flat',
     'Won\'t Start',
     'Battery Dead',
     'Chain / Brake',
+    'Overheating',
+    'Fuel Problem',
+    'Lights / Electrical',
+    'Clutch / Gear',
+    'Strange Noise',
+    'Oil / Fluid Leak',
+    'Key Lost / Lockout',
     'Accident / Towing',
     'Other',
+  ];
+
+  // ---------------------------------------------------------------------------
+  // Live tracking, chat & safety
+  // ---------------------------------------------------------------------------
+
+  /// Realtime is the primary channel; this poll is the safety net.
+  static const Duration trackingPollInterval = Duration(seconds: 10);
+  static const Duration chatPollInterval = Duration(seconds: 6);
+  static const Duration nearbyRefreshInterval = Duration(seconds: 60);
+
+  /// Average city speed used for the ETA shown to the customer.
+  static const double cityAverageSpeedKmh = 18;
+
+  static const String emergencyNumber = '112';
+  static const String ambulanceNumber = '108';
+
+  static const List<String> cancelReasons = <String>[
+    'Mechanic is taking too long',
+    'I fixed the problem myself',
+    'I booked by mistake',
+    'I found help elsewhere',
+    'Wrong pickup location',
+    'Other',
+  ];
+
+  static const List<String> positiveReviewTags = <String>[
+    'On time',
+    'Polite',
+    'Expert work',
+    'Fair price',
+    'Clean work',
+    'Explained the problem',
+  ];
+  static const List<String> negativeReviewTags = <String>[
+    'Late',
+    'Rude',
+    'Overcharged',
+    'Problem not fixed',
+  ];
+
+  static const List<String> chatQuickReplies = <String>[
+    'Where are you now?',
+    'I am at the pickup spot',
+    'Please call me when you reach',
+    'How long will it take?',
+    'Thank you!',
   ];
 
   /// Returns display metadata for [vehicleKey], falling back to two-wheeler.

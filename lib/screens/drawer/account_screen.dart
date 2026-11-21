@@ -72,14 +72,16 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Future<void> _open(String url) async {
-    final ok = await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    final ok = await launchUrl(
+      Uri.parse(url),
+      mode: LaunchMode.externalApplication,
+    );
     if (!ok) _snack('Could not open the link.');
   }
 
   void _openDoc(LegalDoc doc) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => LegalScreen(doc: doc)),
-    );
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => LegalScreen(doc: doc)));
   }
 
   Future<void> _confirmDelete() async {
@@ -88,7 +90,11 @@ class _AccountScreenState extends State<AccountScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setLocal) => AlertDialog(
-          icon: const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 36),
+          icon: const Icon(
+            Icons.warning_amber_rounded,
+            color: Colors.red,
+            size: 36,
+          ),
           title: const Text('Delete your account?'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -106,12 +112,18 @@ class _AccountScreenState extends State<AccountScreen> {
                 contentPadding: EdgeInsets.zero,
                 controlAffinity: ListTileControlAffinity.leading,
                 onChanged: (v) => setLocal(() => understood = v ?? false),
-                title: const Text('I understand', style: TextStyle(fontSize: 13.5)),
+                title: const Text(
+                  'I understand',
+                  style: TextStyle(fontSize: 13.5),
+                ),
               ),
             ],
           ),
           actions: <Widget>[
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel'),
+            ),
             FilledButton(
               style: FilledButton.styleFrom(backgroundColor: Colors.red),
               onPressed: understood ? () => Navigator.pop(ctx, true) : null,
@@ -134,7 +146,12 @@ class _AccountScreenState extends State<AccountScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _deleting = false);
-      _snack(ErrorHelper.friendly(e, fallback: 'Could not delete the account. Please try again.'));
+      _snack(
+        ErrorHelper.friendly(
+          e,
+          fallback: 'Could not delete the account. Please try again.',
+        ),
+      );
     }
   }
 
@@ -171,22 +188,32 @@ class _AccountScreenState extends State<AccountScreen> {
                           hintText: 'Your mechanic will see this name',
                           counterText: '',
                           prefixIcon: const Icon(Icons.person_outline_rounded),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 10),
                       Row(
                         children: <Widget>[
-                          const Icon(Icons.phone_rounded, size: 18, color: Colors.blueGrey),
+                          const Icon(
+                            Icons.phone_rounded,
+                            size: 18,
+                            color: Colors.blueGrey,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              _customer?.phone ?? _auth.currentUser?.phone ?? '',
+                              _customer?.phone ??
+                                  _auth.currentUser?.phone ??
+                                  '',
                               style: TextStyle(color: Colors.blueGrey.shade700),
                             ),
                           ),
                           FilledButton(
-                            style: FilledButton.styleFrom(minimumSize: const Size(96, 42)),
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size(96, 42),
+                            ),
                             onPressed: _savingName ? null : _saveName,
                             child: _savingName
                                 ? const DotsLoader()
@@ -203,15 +230,38 @@ class _AccountScreenState extends State<AccountScreen> {
                   decoration: _card(),
                   child: Column(
                     children: <Widget>[
-                      _link(Icons.privacy_tip_outlined, 'Privacy Policy', () => _openDoc(LegalContent.privacy)),
+                      _link(
+                        Icons.privacy_tip_outlined,
+                        'Privacy Policy',
+                        () => _openDoc(LegalContent.privacy),
+                      ),
                       const Divider(height: 1),
-                      _link(Icons.description_outlined, 'Terms of Service', () => _openDoc(LegalContent.terms)),
+                      _link(
+                        Icons.description_outlined,
+                        'Terms of Service',
+                        () => _openDoc(LegalContent.terms),
+                      ),
                       const Divider(height: 1),
-                      _link(Icons.info_outline_rounded, 'How account deletion works', () => _open(AppConstants.deleteAccountUrl), external: true),
+                      _link(
+                        Icons.info_outline_rounded,
+                        'How account deletion works',
+                        () => _open(AppConstants.deleteAccountUrl),
+                        external: true,
+                      ),
                       const Divider(height: 1),
-                      _link(Icons.public_rounded, 'Website', () => _open(AppConstants.websiteUrl), external: true),
+                      _link(
+                        Icons.public_rounded,
+                        'Website',
+                        () => _open(AppConstants.websiteUrl),
+                        external: true,
+                      ),
                       const Divider(height: 1),
-                      _link(Icons.support_agent_rounded, 'WhatsApp Support (${AppConstants.supportPhoneDisplay})', () => _open(AppConstants.whatsappSupportUrl), external: true),
+                      _link(
+                        Icons.support_agent_rounded,
+                        'WhatsApp Support (${AppConstants.supportPhoneDisplay})',
+                        () => _open(AppConstants.whatsappSupportUrl),
+                        external: true,
+                      ),
                     ],
                   ),
                 ),
@@ -222,9 +272,20 @@ class _AccountScreenState extends State<AccountScreen> {
                   child: ListTile(
                     leading: _deleting
                         ? const WheelLoader(size: 18)
-                        : const Icon(Icons.delete_forever_rounded, color: Colors.red),
-                    title: const Text('Delete my account', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
-                    subtitle: const Text('Permanently remove your account and personal data'),
+                        : const Icon(
+                            Icons.delete_forever_rounded,
+                            color: Colors.red,
+                          ),
+                    title: const Text(
+                      'Delete my account',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'Permanently remove your account and personal data',
+                    ),
                     onTap: _deleting ? null : _confirmDelete,
                   ),
                 ),
@@ -232,7 +293,10 @@ class _AccountScreenState extends State<AccountScreen> {
                 Center(
                   child: Text(
                     '${AppConstants.appName} v${AppConstants.appVersion}',
-                    style: TextStyle(color: Colors.blueGrey.shade400, fontSize: 12),
+                    style: TextStyle(
+                      color: Colors.blueGrey.shade400,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ],
@@ -241,27 +305,35 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   Widget _section(String t) => Padding(
-        padding: const EdgeInsets.only(left: 4, bottom: 8),
-        child: Text(
-          t.toUpperCase(),
-          style: TextStyle(
-            fontSize: 12,
-            letterSpacing: 0.8,
-            fontWeight: FontWeight.w700,
-            color: Colors.blueGrey.shade500,
-          ),
-        ),
-      );
+    padding: const EdgeInsets.only(left: 4, bottom: 8),
+    child: Text(
+      t.toUpperCase(),
+      style: TextStyle(
+        fontSize: 12,
+        letterSpacing: 0.8,
+        fontWeight: FontWeight.w700,
+        color: Colors.blueGrey.shade500,
+      ),
+    ),
+  );
 
   BoxDecoration _card() => BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      );
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(16),
+  );
 
-  Widget _link(IconData icon, String title, VoidCallback onTap, {bool external = false}) => ListTile(
-        leading: Icon(icon, color: AppConstants.secondaryDarkColor),
-        title: Text(title),
-        trailing: Icon(external ? Icons.open_in_new_rounded : Icons.chevron_right_rounded, size: 20),
-        onTap: onTap,
-      );
+  Widget _link(
+    IconData icon,
+    String title,
+    VoidCallback onTap, {
+    bool external = false,
+  }) => ListTile(
+    leading: Icon(icon, color: AppConstants.secondaryDarkColor),
+    title: Text(title),
+    trailing: Icon(
+      external ? Icons.open_in_new_rounded : Icons.chevron_right_rounded,
+      size: 20,
+    ),
+    onTap: onTap,
+  );
 }

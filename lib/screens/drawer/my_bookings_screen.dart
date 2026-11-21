@@ -130,7 +130,9 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
       body: RefreshIndicator(
         onRefresh: _loadBookings,
         child: _isLoading
-            ? const Center(child: RoadLoader(messages: <String>['Loading your bookings…']))
+            ? const Center(
+                child: RoadLoader(messages: <String>['Loading your bookings…']),
+              )
             : _errorMessage != null
             ? ListView(
                 padding: const EdgeInsets.all(24),
@@ -262,6 +264,38 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                               fontSize: 12.5,
                             ),
                           ),
+                          if (booking.repairAmount != null) ...<Widget>[
+                            const SizedBox(height: 8),
+                            Row(
+                              children: <Widget>[
+                                const Icon(
+                                  Icons.receipt_long_rounded,
+                                  size: 16,
+                                  color: AppConstants.secondaryDarkColor,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Repair bill: ₹${booking.repairAmount}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 12.5,
+                                    color: AppConstants.secondaryDarkColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                          if (booking.isCancelled &&
+                              booking.cancelReason != null) ...<Widget>[
+                            const SizedBox(height: 6),
+                            Text(
+                              'Reason: ${booking.cancelReason}',
+                              style: TextStyle(
+                                color: Colors.blueGrey.shade500,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 10),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,

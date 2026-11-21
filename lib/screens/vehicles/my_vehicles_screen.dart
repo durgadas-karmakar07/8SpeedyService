@@ -52,7 +52,9 @@ class _MyVehiclesScreenState extends State<MyVehiclesScreen> {
 
   Future<void> _add() async {
     final added = await Navigator.of(context).push<CustomerVehicle>(
-      MaterialPageRoute<CustomerVehicle>(builder: (_) => const AddVehicleScreen()),
+      MaterialPageRoute<CustomerVehicle>(
+        builder: (_) => const AddVehicleScreen(),
+      ),
     );
     if (added != null) _load();
   }
@@ -62,9 +64,14 @@ class _MyVehiclesScreenState extends State<MyVehiclesScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Remove vehicle?'),
-        content: Text('${v.name} will be removed from your list. Past bookings are not affected.'),
+        content: Text(
+          '${v.name} will be removed from your list. Past bookings are not affected.',
+        ),
         actions: <Widget>[
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
@@ -79,7 +86,8 @@ class _MyVehiclesScreenState extends State<MyVehiclesScreen> {
       _load();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ErrorHelper.friendly(e))));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(ErrorHelper.friendly(e))));
     }
   }
 
@@ -119,7 +127,12 @@ class _MyVehiclesScreenState extends State<MyVehiclesScreen> {
               )
             else if (_vehicles.isEmpty) ...<Widget>[
               const SizedBox(height: 24),
-              Center(child: VehicleImage(asset: VehicleCatalog.bodyTypes.first.asset, height: 120)),
+              Center(
+                child: VehicleImage(
+                  asset: VehicleCatalog.bodyTypes.first.asset,
+                  height: 120,
+                ),
+              ),
               const SizedBox(height: 16),
               const Text(
                 'No vehicles saved yet',
@@ -134,20 +147,39 @@ class _MyVehiclesScreenState extends State<MyVehiclesScreen> {
                   elevation: 0,
                   color: Colors.white,
                   margin: const EdgeInsets.only(bottom: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     child: Row(
                       children: <Widget>[
-                        SizedBox(width: 96, child: VehicleImage(asset: v.asset, height: 56)),
+                        SizedBox(
+                          width: 96,
+                          child: VehicleImage(asset: v.asset, height: 56),
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              Text(v.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                              Text(
+                                v.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                ),
+                              ),
                               const SizedBox(height: 2),
-                              Text(v.subtitle, style: TextStyle(color: Colors.blueGrey.shade600)),
+                              Text(
+                                v.subtitle,
+                                style: TextStyle(
+                                  color: Colors.blueGrey.shade600,
+                                ),
+                              ),
                             ],
                           ),
                         ),

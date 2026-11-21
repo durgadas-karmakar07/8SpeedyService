@@ -65,9 +65,7 @@ class PaymentService {
         'netbanking': true,
         'wallet': true,
       },
-      'theme': <String, dynamic>{
-        'color': '#FF5722',
-      },
+      'theme': <String, dynamic>{'color': '#FF5722'},
     };
 
     try {

@@ -15,14 +15,16 @@ class VoiceClip {
   final String path;
   final Duration duration;
 
-  int get seconds => (duration.inMilliseconds / 1000).ceil().clamp(1, 90).toInt();
+  int get seconds =>
+      (duration.inMilliseconds / 1000).ceil().clamp(1, 90).toInt();
 }
 
 /// Player state reported by the native side.
 class VoicePlayerEvent {
   const VoicePlayerEvent(this.state, this.source, this.durationMs);
 
-  final String state; // loading | playing | paused | completed | stopped | error
+  final String
+  state; // loading | playing | paused | completed | stopped | error
   final String? source;
   final int durationMs;
 }
@@ -36,9 +38,12 @@ class VoiceService {
 
   static final VoiceService instance = VoiceService._();
 
-  static const MethodChannel _channel = MethodChannel('com.speedyservice.customer/voice');
+  static const MethodChannel _channel = MethodChannel(
+    'com.speedyservice.customer/voice',
+  );
 
-  final StreamController<String> _recorderEvents = StreamController<String>.broadcast();
+  final StreamController<String> _recorderEvents =
+      StreamController<String>.broadcast();
   final StreamController<VoicePlayerEvent> _playerEvents =
       StreamController<VoicePlayerEvent>.broadcast();
 
@@ -56,11 +61,13 @@ class VoiceService {
         final m = call.arguments;
         if (m is Map) {
           final d = m['durationMs'];
-          _playerEvents.add(VoicePlayerEvent(
-            m['state']?.toString() ?? 'stopped',
-            m['source']?.toString(),
-            d is num ? d.toInt() : 0,
-          ));
+          _playerEvents.add(
+            VoicePlayerEvent(
+              m['state']?.toString() ?? 'stopped',
+              m['source']?.toString(),
+              d is num ? d.toInt() : 0,
+            ),
+          );
         }
     }
     return null;
@@ -78,7 +85,8 @@ class VoiceService {
   // Permission
   // ---------------------------------------------------------------------------
 
-  Future<bool> hasMicPermission() async => await _invoke<bool>('hasMic') ?? false;
+  Future<bool> hasMicPermission() async =>
+      await _invoke<bool>('hasMic') ?? false;
 
   Future<MicPermission> requestMicPermission() async {
     final s = await _invoke<String>('requestMic');
@@ -120,7 +128,8 @@ class VoiceService {
     return (a / 32767).clamp(0.0, 1.0);
   }
 
-  Future<void> deleteRecording(String path) => _invoke<void>('deleteRecording', path);
+  Future<void> deleteRecording(String path) =>
+      _invoke<void>('deleteRecording', path);
 
   // ---------------------------------------------------------------------------
   // Preview playback
@@ -144,17 +153,26 @@ class VoiceService {
   /// Uploads [clip] for [bookingId] and links it to the booking. The server
   /// only accepts it for the customer's own, still active booking, and only
   /// the mechanics who can see that request are allowed to listen.
-  Future<void> uploadForBooking({required String bookingId, required VoiceClip clip}) async {
+  Future<void> uploadForBooking({
+    required String bookingId,
+    required VoiceClip clip,
+  }) async {
     final client = Supabase.instance.client;
     final uid = client.auth.currentUser?.id;
     if (uid == null) throw StateError('Please log in again.');
 
     final file = File(clip.path);
-    final path = '$uid/${bookingId}_${DateTime.now().millisecondsSinceEpoch}.m4a';
-    await client.storage.from(AppConstants.voiceNoteBucket).upload(
+    final path =
+        '$uid/${bookingId}_${DateTime.now().millisecondsSinceEpoch}.m4a';
+    await client.storage
+        .from(AppConstants.voiceNoteBucket)
+        .upload(
           path,
           file,
-          fileOptions: const FileOptions(contentType: 'audio/mp4', upsert: false),
+          fileOptions: const FileOptions(
+            contentType: 'audio/mp4',
+            upsert: false,
+          ),
         );
     await client.rpc<dynamic>(
       'customer_attach_voice_note',

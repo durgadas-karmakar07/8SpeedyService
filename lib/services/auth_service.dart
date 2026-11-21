@@ -6,8 +6,7 @@ import '../models/customer_model.dart';
 
 /// Handles Supabase phone OTP authentication and customer profile access.
 class AuthService {
-  AuthService({SupabaseClient? client})
-    : _clientOverride = client;
+  AuthService({SupabaseClient? client}) : _clientOverride = client;
 
   final SupabaseClient? _clientOverride;
 
@@ -46,10 +45,7 @@ class AuthService {
   /// Sends a 6-digit SMS OTP to [phoneNumber].
   Future<void> sendOtp(String phoneNumber) async {
     final formatted = normalizeIndianPhone(phoneNumber);
-    await _client.auth.signInWithOtp(
-      phone: formatted,
-      shouldCreateUser: true,
-    );
+    await _client.auth.signInWithOtp(phone: formatted, shouldCreateUser: true);
   }
 
   /// Verifies the 6-digit SMS [otp] for [phoneNumber] and establishes a session.

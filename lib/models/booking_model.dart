@@ -23,7 +23,22 @@ class BookingModel {
     this.createdAt,
     this.vehicleLabel,
     this.vehicleBodyType,
+    this.otpAttempts = 0,
+    this.cancelReason,
+    this.cancelledBy,
+    this.repairAmount,
+    this.repairNotes,
+    this.reviewTags = const <String>[],
+    this.aiSummary,
+    this.acceptedAt,
+    this.arrivedAt,
+    this.startedAt,
+    this.completedAt,
+    this.voiceNotePath,
   });
+
+  static DateTime? _date(dynamic raw) =>
+      raw is String ? DateTime.tryParse(raw)?.toLocal() : null;
 
   /// Parses a `bookings` JSON row from Supabase.
   factory BookingModel.fromJson(Map<String, dynamic> json) {
@@ -64,6 +79,22 @@ class BookingModel {
       createdAt: parsedCreatedAt,
       vehicleLabel: json['vehicle_label'] as String?,
       vehicleBodyType: json['vehicle_body_type'] as String?,
+      otpAttempts: (json['otp_attempts'] as num?)?.toInt() ?? 0,
+      cancelReason: json['cancel_reason'] as String?,
+      cancelledBy: json['cancelled_by'] as String?,
+      repairAmount: (json['repair_amount'] as num?)?.toInt(),
+      repairNotes: json['repair_notes'] as String?,
+      reviewTags: (json['review_tags'] is List)
+          ? (json['review_tags'] as List).map((e) => e.toString()).toList()
+          : const <String>[],
+      aiSummary: (json['ai_diagnosis'] is Map)
+          ? (json['ai_diagnosis'] as Map)['summary']?.toString()
+          : null,
+      acceptedAt: _date(json['accepted_at']),
+      arrivedAt: _date(json['arrived_at']),
+      startedAt: _date(json['started_at']),
+      completedAt: _date(json['completed_at']),
+      voiceNotePath: json['voice_note_path'] as String?,
     );
   }
 
@@ -88,6 +119,26 @@ class BookingModel {
   /// "Honda Activa 6G • WB38AB1234" (null for bookings made before vehicles).
   final String? vehicleLabel;
   final String? vehicleBodyType;
+
+  /// Wrong start-OTP entries by the mechanic (5 = locked, customer can refresh).
+  final int otpAttempts;
+  final String? cancelReason;
+  final String? cancelledBy;
+
+  /// Repair bill the mechanic entered at completion (paid to the mechanic).
+  final int? repairAmount;
+  final String? repairNotes;
+  final List<String> reviewTags;
+
+  /// Short AI diagnosis summary linked to the booking.
+  final String? aiSummary;
+  final DateTime? acceptedAt;
+  final DateTime? arrivedAt;
+  final DateTime? startedAt;
+  final DateTime? completedAt;
+  final String? voiceNotePath;
+
+  bool get otpLocked => otpAttempts >= 5;
 
   /// Name to show: saved vehicle name, else the old category title.
   String get vehicleDisplayName {
@@ -127,6 +178,7 @@ class BookingModel {
     DateTime? createdAt,
     String? vehicleLabel,
     String? vehicleBodyType,
+    int? otpAttempts,
   }) {
     return BookingModel(
       id: id ?? this.id,
@@ -148,6 +200,18 @@ class BookingModel {
       createdAt: createdAt ?? this.createdAt,
       vehicleLabel: vehicleLabel ?? this.vehicleLabel,
       vehicleBodyType: vehicleBodyType ?? this.vehicleBodyType,
+      otpAttempts: otpAttempts ?? this.otpAttempts,
+      cancelReason: cancelReason,
+      cancelledBy: cancelledBy,
+      repairAmount: repairAmount,
+      repairNotes: repairNotes,
+      reviewTags: reviewTags,
+      aiSummary: aiSummary,
+      acceptedAt: acceptedAt,
+      arrivedAt: arrivedAt,
+      startedAt: startedAt,
+      completedAt: completedAt,
+      voiceNotePath: voiceNotePath,
     );
   }
 

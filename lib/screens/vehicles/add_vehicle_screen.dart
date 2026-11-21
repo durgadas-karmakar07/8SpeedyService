@@ -79,7 +79,10 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
           onSubmitted: (v) => Navigator.pop(ctx, v),
         ),
         actions: <Widget>[
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, typed),
             child: const Text('Next'),
@@ -103,8 +106,11 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
     if (body == null || _brand == null || _model == null) return;
     final reg = _reg.text.replaceAll(RegExp(r'[^A-Za-z0-9]'), '').toUpperCase();
     if (reg.isNotEmpty &&
-        !RegExp(r'^([A-Z]{2}\d{1,2}[A-Z]{0,3}\d{1,4}|\d{2}BH\d{4}[A-Z]{1,2})$').hasMatch(reg)) {
-      setState(() => _regError = 'Please enter a valid number, e.g. WB 38 AB 1234');
+        !RegExp(r'^([A-Z]{2}\d{1,2}[A-Z]{0,3}\d{1,4}|\d{2}BH\d{4}[A-Z]{1,2})$')
+            .hasMatch(reg)) {
+      setState(
+        () => _regError = 'Please enter a valid number, e.g. WB 38 AB 1234',
+      );
       return;
     }
     setState(() {
@@ -125,7 +131,14 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
       if (!mounted) return;
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(ErrorHelper.friendly(e, fallback: 'Could not save the vehicle. Please try again.'))),
+        SnackBar(
+          content: Text(
+            ErrorHelper.friendly(
+              e,
+              fallback: 'Could not save the vehicle. Please try again.',
+            ),
+          ),
+        ),
       );
     }
   }
@@ -139,7 +152,10 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          leading: IconButton(icon: const Icon(Icons.arrow_back_rounded), onPressed: _back),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: _back,
+          ),
           title: Text(_titles[_step]),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(4),
@@ -205,11 +221,17 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: selected ? AppConstants.primaryColor : Colors.grey.shade200,
+                color: selected
+                    ? AppConstants.primaryColor
+                    : Colors.grey.shade200,
                 width: selected ? 2 : 1,
               ),
               boxShadow: const <BoxShadow>[
-                BoxShadow(color: Color(0x0F000000), blurRadius: 8, offset: Offset(0, 2)),
+                BoxShadow(
+                  color: Color(0x0F000000),
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
               ],
             ),
             child: Column(
@@ -231,7 +253,10 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 11.5, color: Colors.blueGrey.shade600),
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: Colors.blueGrey.shade600,
+                  ),
                 ),
               ],
             ),
@@ -251,7 +276,9 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
         ? body.brands.keys.toList()
         : (body.brands[_brand] ?? const <String>[]);
     final q = _search.text.trim().toLowerCase();
-    final items = q.isEmpty ? all : all.where((e) => e.toLowerCase().contains(q)).toList();
+    final items = q.isEmpty
+        ? all
+        : all.where((e) => e.toLowerCase().contains(q)).toList();
 
     return Column(
       children: <Widget>[
@@ -268,7 +295,9 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
               isDense: true,
               filled: true,
               fillColor: Colors.white,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
             ),
           ),
         ),
@@ -286,7 +315,10 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                     side: BorderSide(color: Colors.grey.shade200),
                   ),
                   child: ListTile(
-                    title: Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    title: Text(
+                      name,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () {
                       if (brand) {
@@ -308,10 +340,15 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                 color: AppConstants.backgroundColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
-                  side: BorderSide(color: AppConstants.primaryColor.withValues(alpha: 0.4)),
+                  side: BorderSide(
+                    color: AppConstants.primaryColor.withValues(alpha: 0.4),
+                  ),
                 ),
                 child: ListTile(
-                  leading: const Icon(Icons.edit_rounded, color: AppConstants.primaryColor),
+                  leading: const Icon(
+                    Icons.edit_rounded,
+                    color: AppConstants.primaryColor,
+                  ),
                   title: Text(
                     brand ? 'My brand is not listed' : 'My model is not listed',
                     style: const TextStyle(fontWeight: FontWeight.w600),
@@ -337,17 +374,26 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
       ),
       child: Row(
         children: <Widget>[
-          SizedBox(width: 80, child: VehicleImage(asset: body.asset, height: 48)),
+          SizedBox(
+            width: 80,
+            child: VehicleImage(asset: body.asset, height: 48),
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(body.title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                Text(
+                  body.title,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
                 if (_brand != null)
                   Text(
                     _model == null ? _brand! : '$_brand $_model',
-                    style: TextStyle(color: Colors.blueGrey.shade600, fontSize: 12.5),
+                    style: TextStyle(
+                      color: Colors.blueGrey.shade600,
+                      fontSize: 12.5,
+                    ),
                   ),
               ],
             ),
@@ -385,12 +431,18 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                   color: AppConstants.secondaryDarkColor,
                 ),
               ),
-              Text(body.title, style: TextStyle(color: Colors.blueGrey.shade600)),
+              Text(
+                body.title,
+                style: TextStyle(color: Colors.blueGrey.shade600),
+              ),
             ],
           ),
         ),
         const SizedBox(height: 20),
-        const Text('Vehicle number (optional)', style: TextStyle(fontWeight: FontWeight.w700)),
+        const Text(
+          'Vehicle number (optional)',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
         const SizedBox(height: 8),
         TextField(
           controller: _reg,
@@ -403,7 +455,11 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
               (oldV, newV) => newV.copyWith(text: newV.text.toUpperCase()),
             ),
           ],
-          style: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: 1.5, fontSize: 17),
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.5,
+            fontSize: 17,
+          ),
           decoration: InputDecoration(
             hintText: 'WB 38 AB 1234',
             counterText: '',
@@ -420,7 +476,10 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
         ),
         if (body.hasFuel) ...<Widget>[
           const SizedBox(height: 20),
-          const Text('Fuel (optional)', style: TextStyle(fontWeight: FontWeight.w700)),
+          const Text(
+            'Fuel (optional)',
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -445,7 +504,10 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
             icon: _saving
                 ? const DotsLoader()
                 : const Icon(Icons.check_rounded),
-            label: const Text('Save vehicle', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            label: const Text(
+              'Save vehicle',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
           ),
         ),
       ],

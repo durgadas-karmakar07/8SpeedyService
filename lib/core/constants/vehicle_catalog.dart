@@ -53,9 +53,22 @@ class VehicleCatalog {
       category: 'two_wheeler',
       brands: <String, List<String>>{
         'Honda': <String>['Activa 6G', 'Activa 125', 'Dio', 'Grazia'],
-        'TVS': <String>['Jupiter', 'Jupiter 125', 'Ntorq 125', 'Scooty Pep+', 'Scooty Zest', 'iQube'],
+        'TVS': <String>[
+          'Jupiter',
+          'Jupiter 125',
+          'Ntorq 125',
+          'Scooty Pep+',
+          'Scooty Zest',
+          'iQube',
+        ],
         'Suzuki': <String>['Access 125', 'Burgman Street', 'Avenis'],
-        'Hero': <String>['Pleasure+', 'Destini 125', 'Maestro Edge', 'Xoom', 'Vida V1'],
+        'Hero': <String>[
+          'Pleasure+',
+          'Destini 125',
+          'Maestro Edge',
+          'Xoom',
+          'Vida V1',
+        ],
         'Yamaha': <String>['Fascino 125', 'RayZR 125', 'Aerox 155'],
         'Ola Electric': <String>['S1 Pro', 'S1 Air', 'S1 X'],
         'Ather': <String>['450X', '450S', 'Rizta'],
@@ -69,11 +82,47 @@ class VehicleCatalog {
       subtitle: 'Splendor, Pulsar, Shine, Bullet',
       category: 'two_wheeler',
       brands: <String, List<String>>{
-        'Hero': <String>['Splendor Plus', 'Super Splendor', 'HF Deluxe', 'Passion Pro', 'Glamour', 'Xtreme 160R'],
-        'Honda': <String>['Shine', 'SP 125', 'Unicorn', 'Livo', 'Hornet 2.0', 'CB350'],
-        'Bajaj': <String>['Pulsar 125', 'Pulsar 150', 'Pulsar NS200', 'Platina', 'CT 110', 'Avenger', 'Dominar'],
-        'TVS': <String>['Apache RTR 160', 'Apache RTR 200', 'Raider 125', 'Radeon', 'Star City+', 'Sport', 'Ronin'],
-        'Royal Enfield': <String>['Classic 350', 'Bullet 350', 'Hunter 350', 'Meteor 350', 'Himalayan'],
+        'Hero': <String>[
+          'Splendor Plus',
+          'Super Splendor',
+          'HF Deluxe',
+          'Passion Pro',
+          'Glamour',
+          'Xtreme 160R',
+        ],
+        'Honda': <String>[
+          'Shine',
+          'SP 125',
+          'Unicorn',
+          'Livo',
+          'Hornet 2.0',
+          'CB350',
+        ],
+        'Bajaj': <String>[
+          'Pulsar 125',
+          'Pulsar 150',
+          'Pulsar NS200',
+          'Platina',
+          'CT 110',
+          'Avenger',
+          'Dominar',
+        ],
+        'TVS': <String>[
+          'Apache RTR 160',
+          'Apache RTR 200',
+          'Raider 125',
+          'Radeon',
+          'Star City+',
+          'Sport',
+          'Ronin',
+        ],
+        'Royal Enfield': <String>[
+          'Classic 350',
+          'Bullet 350',
+          'Hunter 350',
+          'Meteor 350',
+          'Himalayan',
+        ],
         'Yamaha': <String>['FZ-S', 'FZ-X', 'MT-15', 'R15'],
         'Suzuki': <String>['Gixxer', 'Gixxer SF'],
         'KTM': <String>['Duke 200', 'Duke 390', 'RC 200'],
@@ -86,7 +135,15 @@ class VehicleCatalog {
       subtitle: 'Alto, Wagon R, Swift, i20',
       category: 'four_wheeler',
       brands: <String, List<String>>{
-        'Maruti Suzuki': <String>['Alto K10', 'Wagon R', 'Swift', 'Baleno', 'Celerio', 'S-Presso', 'Ignis'],
+        'Maruti Suzuki': <String>[
+          'Alto K10',
+          'Wagon R',
+          'Swift',
+          'Baleno',
+          'Celerio',
+          'S-Presso',
+          'Ignis',
+        ],
         'Hyundai': <String>['Grand i10 Nios', 'i20'],
         'Tata': <String>['Tiago', 'Altroz'],
         'Renault': <String>['Kwid'],
@@ -114,12 +171,31 @@ class VehicleCatalog {
       subtitle: 'Nexon, Creta, Scorpio, Ertiga',
       category: 'four_wheeler',
       brands: <String, List<String>>{
-        'Maruti Suzuki': <String>['Brezza', 'Ertiga', 'XL6', 'Fronx', 'Grand Vitara'],
+        'Maruti Suzuki': <String>[
+          'Brezza',
+          'Ertiga',
+          'XL6',
+          'Fronx',
+          'Grand Vitara',
+        ],
         'Hyundai': <String>['Creta', 'Venue', 'Exter'],
         'Tata': <String>['Punch', 'Nexon', 'Harrier', 'Safari'],
-        'Mahindra': <String>['Scorpio-N', 'Scorpio Classic', 'Bolero', 'Bolero Neo', 'XUV 3XO', 'XUV700', 'Thar'],
+        'Mahindra': <String>[
+          'Scorpio-N',
+          'Scorpio Classic',
+          'Bolero',
+          'Bolero Neo',
+          'XUV 3XO',
+          'XUV700',
+          'Thar',
+        ],
         'Kia': <String>['Sonet', 'Seltos', 'Carens'],
-        'Toyota': <String>['Innova Crysta', 'Innova Hycross', 'Fortuner', 'Urban Cruiser Hyryder'],
+        'Toyota': <String>[
+          'Innova Crysta',
+          'Innova Hycross',
+          'Fortuner',
+          'Urban Cruiser Hyryder',
+        ],
         'Renault': <String>['Kiger', 'Triber'],
         'Nissan': <String>['Magnite'],
         'MG': <String>['Hector', 'Astor'],
@@ -225,10 +301,14 @@ class VehicleCatalog {
   /// "WB38AB1234" -> "WB 38 AB 1234" (best effort, display only).
   static String formatReg(String? reg) {
     if (reg == null || reg.isEmpty) return '';
-    final m = RegExp(r'^([A-Z]{2})(\d{1,2})([A-Z]{0,3})(\d{1,4})$').firstMatch(reg);
+    final m = RegExp(r'^([A-Z]{2})(\d{1,2})([A-Z]{0,3})(\d{1,4})$')
+        .firstMatch(reg);
     if (m == null) return reg;
-    return <String?>[m.group(1), m.group(2), m.group(3), m.group(4)]
-        .where((p) => p != null && p.isNotEmpty)
-        .join(' ');
+    return <String?>[
+      m.group(1),
+      m.group(2),
+      m.group(3),
+      m.group(4),
+    ].where((p) => p != null && p.isNotEmpty).join(' ');
   }
 }

@@ -24,20 +24,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _OnboardingSlide(
       icon: Icons.bolt_rounded,
       title: 'Nearby Mechanic, Fast Arrival',
-      description:
-          'Stranded in City Centre, Benachity, Bidhannagar, or anywhere in Durgapur? The nearest verified mechanic comes to your exact pin — track them live on the map.',
+      description: 'Stranded in City Centre, Benachity, Bidhannagar, or anywhere in Durgapur? The nearest verified mechanic comes to your exact pin — track them live on the map.',
     ),
     _OnboardingSlide(
       icon: Icons.two_wheeler_rounded,
       title: 'Cycle, Toto, Bike, Car & Heavy',
-      description:
-          'Puncture, starting trouble, dead battery, or brake issue — get specialized roadside assistance for every vehicle type.',
+      description: 'Puncture, starting trouble, dead battery, or brake issue — get specialized roadside assistance for every vehicle type.',
     ),
     _OnboardingSlide(
       icon: Icons.verified_user_rounded,
       title: 'Live Tracking & OTP Safety',
-      description:
-          'Track your mechanic live on the map, call directly, and share your 4-digit Start OTP only when repairs begin.',
+      description: 'Track your mechanic live on the map, call directly, and share your 4-digit Start OTP only when repairs begin.',
     ),
   ];
 
@@ -121,7 +118,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
               child: const Row(
                 children: <Widget>[
-                  Icon(Icons.local_offer_rounded, color: Colors.white, size: 22),
+                  Icon(
+                    Icons.local_offer_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                   SizedBox(width: 12),
                   Expanded(
                     child: Text(

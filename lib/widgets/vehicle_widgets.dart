@@ -63,7 +63,9 @@ class SavedVehicleCard extends StatelessWidget {
                 : Colors.white,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: selected ? AppConstants.primaryColor : Colors.grey.shade300,
+              color: selected
+                  ? AppConstants.primaryColor
+                  : Colors.grey.shade300,
               width: selected ? 2 : 1,
             ),
           ),
@@ -100,7 +102,10 @@ class SavedVehicleCard extends StatelessWidget {
                 feeLabel ?? vehicle.subtitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 11.5, color: Colors.blueGrey.shade600),
+                style: TextStyle(
+                  fontSize: 11.5,
+                  color: Colors.blueGrey.shade600,
+                ),
               ),
             ],
           ),
@@ -124,11 +129,17 @@ class AddVehicleTile extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: large ? double.infinity : 120,
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: large ? 18 : 10),
+        padding: EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: large ? 18 : 10,
+        ),
         decoration: BoxDecoration(
           color: AppConstants.backgroundColor,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: AppConstants.primaryColor.withValues(alpha: 0.45), width: 1.4),
+          border: Border.all(
+            color: AppConstants.primaryColor.withValues(alpha: 0.45),
+            width: 1.4,
+          ),
         ),
         child: large
             ? const Row(
@@ -165,11 +176,18 @@ class AddVehicleTile extends StatelessWidget {
             : const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Icon(Icons.add_circle_outline_rounded, color: AppConstants.primaryColor, size: 30),
+                  Icon(
+                    Icons.add_circle_outline_rounded,
+                    color: AppConstants.primaryColor,
+                    size: 30,
+                  ),
                   SizedBox(height: 6),
                   Text(
                     'Add vehicle',
-                    style: TextStyle(fontWeight: FontWeight.w600, color: AppConstants.primaryColor),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppConstants.primaryColor,
+                    ),
                   ),
                 ],
               ),

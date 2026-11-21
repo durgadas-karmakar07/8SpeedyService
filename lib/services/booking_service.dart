@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/constants/app_constants.dart';
 import '../models/app_config_model.dart';
+import '../models/assist_models.dart';
 import '../models/booking_model.dart';
 import '../models/mechanic_model.dart';
 
@@ -45,9 +46,7 @@ class BookingService {
 
     if (rows.isEmpty) return null;
 
-    final bookings = rows
-        .map((row) => BookingModel.fromJson(row))
-        .toList();
+    final bookings = rows.map((row) => BookingModel.fromJson(row)).toList();
 
     bookings.sort((a, b) {
       if (a.createdAt != null && b.createdAt != null) {
@@ -60,18 +59,18 @@ class BookingService {
   }
 
   /// Fetches all bookings belonging to the signed-in customer.
-  Future<List<BookingModel>> fetchCustomerBookings() async {
+  Future<List<BookingModel>> fetchCustomerBookings({int limit = 60}) async {
     final user = _client.auth.currentUser;
     if (user == null) return const <BookingModel>[];
 
     final rows = await _client
         .from('bookings')
         .select()
-        .eq('customer_id', user.id);
+        .eq('customer_id', user.id)
+        .order('created_at', ascending: false)
+        .limit(limit);
 
-    final bookings = rows
-        .map((row) => BookingModel.fromJson(row))
-        .toList();
+    final bookings = rows.map((row) => BookingModel.fromJson(row)).toList();
 
     bookings.sort((a, b) {
       if (a.createdAt != null && b.createdAt != null) {
@@ -127,9 +126,7 @@ class BookingService {
       return CreateBookingResult.fromJson(response);
     }
     if (response is Map) {
-      return CreateBookingResult.fromJson(
-        Map<String, dynamic>.from(response),
-      );
+      return CreateBookingResult.fromJson(Map<String, dynamic>.from(response));
     }
     if (response is List && response.isNotEmpty && response.first is Map) {
       return CreateBookingResult.fromJson(
@@ -201,13 +198,149 @@ class BookingService {
     return fallback;
   }
 
+  static bool _isMissingFunction(Object e) =>
+      e is PostgrestException && e.code == 'PGRST202';
+
+  static Map<String, dynamic> _asMap(dynamic data) {
+    if (data is Map) return Map<String, dynamic>.from(data);
+    if (data is List && data.isNotEmpty && data.first is Map) {
+      return Map<String, dynamic>.from(data.first as Map);
+    }
+    throw StateError('Unexpected response from the server.');
+  }
+
+  /// Creates a booking with the saved vehicle and (optionally) the AI
+  /// diagnosis the customer made. Falls back to the older RPC if the server
+  /// has not been updated.
+  Future<CreateBookingResult> createBooking({
+    required String vehicleType,
+    required String? vehicleId,
+    required List<String> issueTags,
+    required String issueNote,
+    required String pickupAddress,
+    required double lat,
+    required double lng,
+    String? aiRequestId,
+  }) async {
+    if (vehicleId != null) {
+      try {
+        final dynamic response = await _client.rpc<dynamic>(
+          'create_booking_v2',
+          params: <String, dynamic>{
+            'p_vehicle_id': vehicleId,
+            'p_issue_tags': issueTags,
+            'p_issue_note': issueNote.trim(),
+            'p_pickup_address': pickupAddress.trim(),
+            'p_lat': lat,
+            'p_lng': lng,
+            'p_ai_request_id': aiRequestId,
+          },
+        );
+        return CreateBookingResult.fromJson(_asMap(response));
+      } catch (e) {
+        if (!_isMissingFunction(e)) rethrow;
+      }
+    }
+    return createBookingSecure(
+      vehicleType: vehicleType,
+      vehicleId: vehicleId,
+      issueTags: issueTags,
+      issueNote: issueNote,
+      pickupAddress: pickupAddress,
+      lat: lat,
+      lng: lng,
+    );
+  }
+
+  /// Cancels with a reason (the mechanic and support see it).
+  Future<void> cancelBookingWithReason(String bookingId, String? reason) async {
+    try {
+      await _client.rpc<dynamic>(
+        'cancel_booking_v2',
+        params: <String, dynamic>{
+          'p_booking_id': bookingId,
+          'p_reason': reason,
+        },
+      );
+    } catch (e) {
+      if (!_isMissingFunction(e)) rethrow;
+      await cancelBooking(bookingId);
+    }
+  }
+
+  /// Issues a fresh start OTP (e.g. after the mechanic typed wrong ones).
+  Future<String> refreshStartOtp(String bookingId) async {
+    final dynamic data = await _client.rpc<dynamic>(
+      'customer_refresh_start_otp',
+      params: <String, dynamic>{'p_booking_id': bookingId},
+    );
+    return _asMap(data)['otp']?.toString() ?? '';
+  }
+
+  /// Rating + optional tags. Falls back to the original RPC.
+  Future<void> submitReview({
+    required String bookingId,
+    required int rating,
+    String? reviewText,
+    List<String> tags = const <String>[],
+  }) async {
+    try {
+      await _client.rpc<dynamic>(
+        'submit_booking_review_v2',
+        params: <String, dynamic>{
+          'p_booking_id': bookingId,
+          'p_rating': rating,
+          'p_review_text': reviewText?.trim() ?? '',
+          'p_tags': tags,
+        },
+      );
+    } catch (e) {
+      if (!_isMissingFunction(e)) rethrow;
+      await submitBookingReview(
+        bookingId: bookingId,
+        rating: rating,
+        reviewText: reviewText,
+      );
+    }
+  }
+
+  /// Name, rating, completed jobs and top review tags of the assigned mechanic.
+  Future<MechanicCard?> fetchMechanicCard(String bookingId) async {
+    final dynamic data = await _client.rpc<dynamic>(
+      'customer_get_mechanic_card',
+      params: <String, dynamic>{'p_booking_id': bookingId},
+    );
+    if (data is Map) {
+      return MechanicCard.fromJson(Map<String, dynamic>.from(data));
+    }
+    return null;
+  }
+
+  static List<IssueOption>? _catalogCache;
+
+  /// Server-driven issue chips (cached for the app session).
+  Future<List<IssueOption>> fetchIssueCatalog() async {
+    final cached = _catalogCache;
+    if (cached != null) return cached;
+    final rows = await _client
+        .from('issue_catalog')
+        .select('code, label, icon, categories')
+        .order('sort');
+    final list = rows
+        .map(IssueOption.fromJson)
+        .where((o) => o.label.isNotEmpty)
+        .toList();
+    if (list.isNotEmpty) _catalogCache = list;
+    return list;
+  }
+
   /// Invokes `get_nearby_mechanics` RPC for [lat], [lng], [radiusMeters],
   /// and [vehicleType].
   Future<List<MechanicModel>> getNearbyMechanics({
     required double lat,
     required double lng,
     required int radiusMeters,
-    required String vehicleType,
+    required String? vehicleType,
   }) async {
     final dynamic response = await _client.rpc<dynamic>(
       'get_nearby_mechanics',
@@ -249,9 +382,7 @@ class BookingService {
         .from('bookings')
         .stream(primaryKey: <String>['id'])
         .eq('id', bookingId)
-        .map(
-          (rows) => rows.isEmpty ? null : BookingModel.fromJson(rows.first),
-        );
+        .map((rows) => rows.isEmpty ? null : BookingModel.fromJson(rows.first));
   }
 
   /// Subscribes to realtime location and profile updates for a mechanic row.

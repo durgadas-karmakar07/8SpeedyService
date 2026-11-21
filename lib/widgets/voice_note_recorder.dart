@@ -10,7 +10,11 @@ import '../services/voice_service.dart';
 /// "Describe the problem in your voice" — optional voice note the customer
 /// records before booking. Mechanics who see the request can listen to it.
 class VoiceNoteRecorder extends StatefulWidget {
-  const VoiceNoteRecorder({super.key, required this.onChanged, this.enabled = true});
+  const VoiceNoteRecorder({
+    super.key,
+    required this.onChanged,
+    this.enabled = true,
+  });
 
   /// Called with the finished clip, or null when it was deleted.
   final ValueChanged<VoiceClip?> onChanged;
@@ -169,7 +173,9 @@ class _VoiceNoteRecorderState extends State<VoiceNoteRecorder>
       case 'playing':
         setState(() => _playing = true);
         _playTicker?.cancel();
-        _playTicker = Timer.periodic(const Duration(milliseconds: 150), (_) async {
+        _playTicker = Timer.periodic(const Duration(milliseconds: 150), (
+          _,
+        ) async {
           final pos = await _voice.positionMs();
           if (mounted) setState(() => _playPosMs = pos);
         });
@@ -212,13 +218,19 @@ class _VoiceNoteRecorderState extends State<VoiceNoteRecorder>
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        icon: const Icon(Icons.mic_off_rounded, color: AppConstants.primaryColor),
+        icon: const Icon(
+          Icons.mic_off_rounded,
+          color: AppConstants.primaryColor,
+        ),
         title: const Text('Microphone is blocked'),
         content: const Text(
           'To record a voice note, allow the Microphone permission for 8SpeedyService in Settings.',
         ),
         actions: <Widget>[
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Not now')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Not now'),
+          ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
@@ -246,14 +258,16 @@ class _VoiceNoteRecorderState extends State<VoiceNoteRecorder>
       duration: const Duration(milliseconds: 250),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _mode == _Mode.recording ? const Color(0xFFFFF1EC) : Colors.white,
+        color: _mode == _Mode.recording
+            ? const Color(0xFFFFF1EC)
+            : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: _mode == _Mode.recording
               ? AppConstants.primaryColor
               : _mode == _Mode.recorded
-                  ? AppConstants.successColor
-                  : Colors.grey.shade200,
+              ? AppConstants.successColor
+              : Colors.grey.shade200,
           width: _mode == _Mode.idle ? 1 : 1.5,
         ),
       ),
@@ -290,7 +304,11 @@ class _VoiceNoteRecorderState extends State<VoiceNoteRecorder>
               SizedBox(height: 2),
               Text(
                 'Optional • up to 60 sec • any language. Nearby mechanics can listen before they come.',
-                style: TextStyle(fontSize: 12, color: Colors.blueGrey, height: 1.3),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.blueGrey,
+                  height: 1.3,
+                ),
               ),
             ],
           ),
@@ -312,7 +330,9 @@ class _VoiceNoteRecorderState extends State<VoiceNoteRecorder>
                 width: 12,
                 height: 12,
                 decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.4 + 0.6 * (1 - _pulse.value)),
+                  color: Colors.red.withValues(
+                    alpha: 0.4 + 0.6 * (1 - _pulse.value),
+                  ),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -320,7 +340,10 @@ class _VoiceNoteRecorderState extends State<VoiceNoteRecorder>
             const SizedBox(width: 8),
             const Text(
               'Recording… speak now',
-              style: TextStyle(fontWeight: FontWeight.w700, color: AppConstants.secondaryDarkColor),
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: AppConstants.secondaryDarkColor,
+              ),
             ),
             const Spacer(),
             Text(
@@ -336,13 +359,18 @@ class _VoiceNoteRecorderState extends State<VoiceNoteRecorder>
         SizedBox(
           height: 44,
           width: double.infinity,
-          child: CustomPaint(painter: _LiveWavePainter(List<double>.of(_levels))),
+          child: CustomPaint(
+            painter: _LiveWavePainter(List<double>.of(_levels)),
+          ),
         ),
         const SizedBox(height: 6),
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
-            value: (_elapsed.inMilliseconds / max.inMilliseconds).clamp(0.0, 1.0),
+            value: (_elapsed.inMilliseconds / max.inMilliseconds).clamp(
+              0.0,
+              1.0,
+            ),
             minHeight: 4,
             color: AppConstants.primaryColor,
             backgroundColor: Colors.grey.shade200,
@@ -356,7 +384,9 @@ class _VoiceNoteRecorderState extends State<VoiceNoteRecorder>
               onPressed: _cancelRecording,
               icon: const Icon(Icons.delete_outline_rounded),
               label: const Text('Cancel'),
-              style: TextButton.styleFrom(foregroundColor: Colors.blueGrey.shade700),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.blueGrey.shade700,
+              ),
             ),
             AnimatedBuilder(
               animation: _pulse,
@@ -400,7 +430,11 @@ class _VoiceNoteRecorderState extends State<VoiceNoteRecorder>
             children: <Widget>[
               Row(
                 children: <Widget>[
-                  const Icon(Icons.check_circle_rounded, size: 16, color: AppConstants.successColor),
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    size: 16,
+                    color: AppConstants.successColor,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     'Voice note ready • ${_fmt(c.duration)}',

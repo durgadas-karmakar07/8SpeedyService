@@ -21,13 +21,14 @@ class ErrorHelper {
     if (error is PostgrestException) {
       // Messages raised by our SQL functions are already user friendly.
       final message = error.message.trim();
-      if (error.code == 'PGRST202') {
+      if (error.code == 'PGRST202' || error.code == 'PT404') {
         return 'The server is being updated. Please try again in a few minutes.';
       }
       if (error.code == '28000' || error.code == 'PGRST301') {
         return 'Your session has expired. Please log in again.';
       }
-      if (message.isNotEmpty && !message.contains('violates') &&
+      if (message.isNotEmpty &&
+          !message.contains('violates') &&
           !message.contains('permission denied')) {
         return message;
       }

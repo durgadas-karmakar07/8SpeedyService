@@ -47,5 +47,6 @@ class CustomerVehicle {
     return VehicleCatalog.bodyFor(bodyType)?.title ?? '';
   }
 
-  String get asset => VehicleCatalog.assetFor(bodyType: bodyType, category: category);
+  String get asset =>
+      VehicleCatalog.assetFor(bodyType: bodyType, category: category);
 }

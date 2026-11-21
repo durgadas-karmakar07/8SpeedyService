@@ -2,13 +2,16 @@
 
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../core/constants/app_constants.dart';
+import '../core/utils/error_helper.dart';
 import '../models/booking_model.dart';
 import '../models/mechanic_model.dart';
+import '../services/booking_live.dart';
 import '../services/booking_service.dart';
 import '4_home_map_screen.dart';
 import '7_live_tracking_screen.dart';
@@ -18,10 +21,7 @@ import '../widgets/speedy_loader.dart';
 /// `get_nearby_mechanics` search radii (`3000m -> 6000m -> 10000m`) every 45s
 /// and listening to the booking realtime stream for mechanic acceptance.
 class SearchingRadarScreen extends StatefulWidget {
-  const SearchingRadarScreen({
-    super.key,
-    required this.initialBooking,
-  });
+  const SearchingRadarScreen({super.key, required this.initialBooking});
 
   final BookingModel initialBooking;
 
@@ -34,7 +34,8 @@ class _SearchingRadarScreenState extends State<SearchingRadarScreen>
   final BookingService _bookingService = BookingService();
 
   late final AnimationController _radarController;
-  StreamSubscription<BookingModel?>? _bookingSub;
+  BookingLive? _live;
+  Timer? _statusPoll;
   Timer? _radiusTimer;
 
   late BookingModel _booking;
@@ -60,62 +61,75 @@ class _SearchingRadarScreenState extends State<SearchingRadarScreen>
     _startRadiusExpansionTimer();
   }
 
+  /// Private Realtime Broadcast for instant updates + a slow poll as the
+  /// safety net (a dropped socket never leaves the customer stuck).
   void _startBookingStream() {
-    _bookingSub = _bookingService
-        .streamBooking(_booking.id)
-        .listen(
-          (updated) {
-            if (!mounted || updated == null || _hasNavigated) return;
-            setState(() => _booking = updated);
+    _live = BookingLive(bookingId: _booking.id, onStatus: (_) => _checkStatus())
+      ..start();
+    _statusPoll = Timer.periodic(
+      AppConstants.trackingPollInterval,
+      (_) => _checkStatus(),
+    );
+  }
 
-            if (updated.status == AppConstants.statusAccepted ||
-                updated.isArrived ||
-                updated.isInProgress) {
-              _hasNavigated = true;
-              _stopSearching();
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute<void>(
-                  builder: (_) => LiveTrackingScreen(
-                    bookingId: updated.id,
-                    initialBooking: updated,
-                  ),
-                ),
-              );
-            } else if (updated.isCancelled) {
-              _hasNavigated = true;
-              _stopSearching();
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute<void>(builder: (_) => const HomeMapScreen()),
-                (_) => false,
-              );
-            }
-          },
-          onError: (_) {
-            if (!mounted) return;
-            setState(() {
-              _searchStatusNote =
-                  'Reconnecting to live booking status updates...';
-            });
-          },
+  Future<void> _checkStatus() async {
+    if (_hasNavigated) return;
+    try {
+      final updated = await _bookingService.fetchBookingById(_booking.id);
+      if (!mounted || updated == null || _hasNavigated) return;
+      setState(() => _booking = updated);
+
+      if (updated.isAccepted || updated.isArrived || updated.isInProgress) {
+        _hasNavigated = true;
+        _stopSearching();
+        HapticFeedback.heavyImpact();
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute<void>(
+            builder: (_) => LiveTrackingScreen(
+              bookingId: updated.id,
+              initialBooking: updated,
+            ),
+          ),
         );
+      } else if (updated.isCancelled) {
+        _hasNavigated = true;
+        _stopSearching();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              updated.cancelledBy == 'SYSTEM_NO_MECHANIC'
+                  ? 'No mechanic was free nearby. Your free credit has been returned — please try again.'
+                  : 'This booking was cancelled.',
+            ),
+          ),
+        );
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute<void>(builder: (_) => const HomeMapScreen()),
+          (_) => false,
+        );
+      }
+    } catch (_) {
+      if (!mounted) return;
+      setState(
+        () => _searchStatusNote =
+            'Reconnecting to live booking status updates...',
+      );
+    }
   }
 
   void _startRadiusExpansionTimer() {
-    _radiusTimer = Timer.periodic(
-      AppConstants.radarExpansionInterval,
-      (timer) {
-        if (!mounted || _hasNavigated) {
-          timer.cancel();
-          return;
-        }
-        if (_radiusIndex < AppConstants.searchRadiiMeters.length - 1) {
-          setState(() {
-            _radiusIndex += 1;
-          });
-        }
-        _searchNearbyMechanics();
-      },
-    );
+    _radiusTimer = Timer.periodic(AppConstants.radarExpansionInterval, (timer) {
+      if (!mounted || _hasNavigated) {
+        timer.cancel();
+        return;
+      }
+      if (_radiusIndex < AppConstants.searchRadiiMeters.length - 1) {
+        setState(() {
+          _radiusIndex += 1;
+        });
+      }
+      _searchNearbyMechanics();
+    });
   }
 
   Future<void> _searchNearbyMechanics() async {
@@ -171,7 +185,10 @@ class _SearchingRadarScreenState extends State<SearchingRadarScreen>
     setState(() => _isCancelling = true);
 
     try {
-      await _bookingService.cancelBooking(_booking.id);
+      await _bookingService.cancelBookingWithReason(
+        _booking.id,
+        'Cancelled while searching',
+      );
       if (!mounted) return;
       _hasNavigated = true;
       _stopSearching();
@@ -179,12 +196,17 @@ class _SearchingRadarScreenState extends State<SearchingRadarScreen>
         MaterialPageRoute<void>(builder: (_) => const HomeMapScreen()),
         (_) => false,
       );
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       setState(() => _isCancelling = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not cancel booking right now. Please retry.'),
+        SnackBar(
+          content: Text(
+            ErrorHelper.friendly(
+              e,
+              fallback: 'Could not cancel booking right now. Please retry.',
+            ),
+          ),
         ),
       );
     }
@@ -193,8 +215,10 @@ class _SearchingRadarScreenState extends State<SearchingRadarScreen>
   void _stopSearching() {
     _radiusTimer?.cancel();
     _radiusTimer = null;
-    _bookingSub?.cancel();
-    _bookingSub = null;
+    _statusPoll?.cancel();
+    _statusPoll = null;
+    _live?.dispose();
+    _live = null;
   }
 
   @override
@@ -469,10 +493,7 @@ class _SearchingRadarScreenState extends State<SearchingRadarScreen>
 }
 
 class _RadarPulsePainter extends CustomPainter {
-  const _RadarPulsePainter({
-    required this.progress,
-    required this.color,
-  });
+  const _RadarPulsePainter({required this.progress, required this.color});
 
   final double progress;
   final Color color;
